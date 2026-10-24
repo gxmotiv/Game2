@@ -1,0 +1,126 @@
+; Engine configuration file for VEIL CIRCUIT
+; Godot 4.3 LTS - Compatibility Renderer (GLES3)
+
+[application]
+
+config/name="VEIL CIRCUIT"
+config/version="0.1.0"
+config/icon="res://assets/textures/icon.png"
+run/main_scene="res://scenes/main/main.tscn"
+run/first_scene="res://scenes/main/main.tscn"
+run/low_processor_usage_mode="on"
+run/low_processor_usage_sleep_usec=10000
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/resizable=false
+window/size/fullscreen_mode=2
+window/size/always_on_top=false
+window/vsync/vsync_mode=1
+window/permit/allow_hidpi=true
+
+[rendering]
+
+renderer/rendering_method="compatibility"
+rendering/quality/shadows/enable=false
+rendering/quality/shadows/atlas_size=1024
+rendering/quality/shadows/directional_shadow_count=1
+rendering/quality/reflections/enable=false
+rendering/quality/ssao/enable=false
+rendering/quality/sdfgi/enable=false
+rendering/quality/volumetric_fog/enable=false
+rendering/quality/depth_prepass/enable=false
+rendering/quality/occlusion_culling/enable=true
+rendering/quality/framebuffer_allocation=1
+rendering/limits/render_buffers=2
+rendering/environment/default_clear_color=Color(0.05, 0.05, 0.08, 1)
+rendering/environment/default_environment=""
+
+[rendering/compatibility]
+
+framebuffer_format=1
+use_depth_prepass=false
+use_occlusion_culling=true
+max_directional_lights=1
+max_omni_lights=16
+max_spot_lights=16
+max_reflection_probes=0
+max_decals=16
+max_particles=1000
+
+[physics]
+
+common/physics_ticks_per_second=60
+common/physics_jitter_fix=0.5
+3d/physics_engine="GodotPhysics"
+3d/active_soft_world=false
+
+[input]
+
+default_deadzone=0.15
+use_accumulated_input=false
+
+[autoload]
+
+GameGlobals = "*res://scripts/autoloads/globals.gd"
+InputManager = "*res://scripts/autoloads/input_map.gd"
+AudioManager = "*res://scripts/autoloads/audio_manager.gd"
+StealthSystem = "*res://scripts/core/stealth_system.gd"
+SaveManager = "*res://scripts/autoloads/save_manager.gd"
+
+[debug]
+
+settings/gdscript/warnings/enable=true
+settings/gdscript/warnings/treat_warnings_as_errors=false
+settings/gdscript/warnings/unsafe_cast=true
+settings/gdscript/warnings/unsafe_property_access=true
+settings/gdscript/warnings/shadowed_variable=true
+settings/gdscript/warnings/unreachable_code=true
+settings/gdscript/warnings/unused_argument=true
+settings/gdscript/warnings/unused_signal=true
+settings/gdscript/warnings/unused_variable=true
+settings/gdscript/warnings/return_value_discarded=true
+settings/gdscript/warnings/standing_expression=true
+
+[editor]
+
+interface/editor_language="en"
+filesystem/import/default_texture_filter=0
+filesystem/import/default_texture_repeat=0
+filesystem/import/compress/mode=2
+filesystem/import/compress/lossy_quality=0.7
+filesystem/import/mipmaps/generate=true
+filesystem/import/mipmaps/limit=8
+filesystem/import/normal_map/enable=false
+filesystem/import/3d/mesh/compress=true
+filesystem/import/3d/mesh/ensure_tangents=true
+filesystem/import/3d/mesh/storage_compress=false
+
+[export]
+
+android/package_name="com.veilcircuit.game"
+android/version_code=1
+android/version_name="0.1.0"
+android/permissions=["android.permission.INTERNET", "android.permission.VIBRATE", "android.permission.WAKE_LOCK"]
+android/orientation="landscape"
+android/architectures=["arm32", "arm64"]
+android/debug_keystore=""
+android/release_keystore=""
+android/release_keystore_user=""
+android/release_keystore_password=""
+android/keystore_alias=""
+
+[locale]
+
+locale/fallback="en"
+locale/test="en"
+
+[global_classes]
+
+"scripts/autoloads/globals.gd" = "GameGlobalsClass"
+"scripts/autoloads/input_map.gd" = "InputManager"
+"scripts/autoloads/audio_manager.gd" = "AudioManagerClass"
+"scripts/core/stealth_system.gd" = "StealthSystemClass"
+"scripts/autoloads/save_manager.gd" = "SaveManagerClass"
