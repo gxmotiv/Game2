@@ -82,17 +82,17 @@ jobs:
       - name: Configure Godot editor settings
         run: |
           mkdir -p $HOME/.config/godot
-          cat > $HOME/.config/godot/editor_settings-4.tres << 'EOF'
-[gd_resource type="EditorSettings" load_steps=2 format=3]
-
-[ext_resource type="Script" path="res://scripts/editor_settings.gd" id="1"]
-
-[resource]
-export/android/adb = ""
-export/android/jdk_path = "/usr/lib/jvm/java-21-openjdk-amd64"
-export/android/sdk_path = "/home/runner/android-sdk"
-run/main_scene = "res://scenes/main/main.tscn"
-EOF
+          printf '%s\n' \
+            '[gd_resource type="EditorSettings" load_steps=2 format=3]' \
+            '' \
+            '[ext_resource type="Script" path="res://scripts/editor_settings.gd" id="1"]' \
+            '' \
+            '[resource]' \
+            'export/android/adb = ""' \
+            'export/android/jdk_path = "/usr/lib/jvm/java-21-openjdk-amd64"' \
+            'export/android/sdk_path = "/home/runner/android-sdk"' \
+            'run/main_scene = "res://scenes/main/main.tscn"' \
+            > $HOME/.config/godot/editor_settings-4.tres
 
       - name: Verify project structure
         run: |
