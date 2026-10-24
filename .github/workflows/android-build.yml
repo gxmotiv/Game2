@@ -62,7 +62,15 @@ jobs:
 
       - name: Accept Android licenses and install SDK packages
         run: |
+          # Disable pipefail only for license acceptance to handle broken pipe from 'yes'
+          set +o pipefail
           yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+          LICENSE_EXIT=${PIPESTATUS[1]}
+          set -o pipefail
+          if [ $LICENSE_EXIT -ne 0 ]; then
+            echo "ERROR: License acceptance failed with exit code $LICENSE_EXIT"
+            exit 1
+          fi
           $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" "ndk;27.0.12077973"
 
       - name: Download Godot 4.3 stable
