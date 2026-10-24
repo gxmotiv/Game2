@@ -38,8 +38,12 @@ func _ready() -> void:
 	
 	if status_light and status_light.material_override:
 		_original_light_color = status_light.material_override.albedo_color
-		if status_light.material_override.emission_enabled:
-			_original_emission = status_light.material_override.emission_color
+		# Set initial emission color (green for active terminal)
+		status_light.material_override.emission_color = Color(0.2, 0.8, 0.4, 1.0)
+		_original_emission = status_light.material_override.emission_color
+	
+	if status_light_glow:
+		status_light_glow.light_color = Color(1.0, 0.3, 0.1, 1.0)
 	
 	# Add to "hackable" group for easy finding
 	add_to_group("hackable")

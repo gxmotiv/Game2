@@ -24,7 +24,6 @@ size = Vector3(0.3, 0.3, 0.15)
 albedo_color = Color(0.2, 0.8, 0.4, 1.0)
 emission_enabled = true
 emission_energy_multiplier = 1.0
-emission_color = Color(0.2, 0.8, 0.4, 1.0)
 
 [sub_resource type="SphereMesh" id="9"]
 radius = 0.15
@@ -36,7 +35,6 @@ rings = 6
 albedo_color = Color(1.0, 0.3, 0.1, 1.0)
 emission_enabled = true
 emission_energy_multiplier = 2.0
-emission_color = Color(1.0, 0.3, 0.1, 1.0)
 
 [node name="Terminal" type="StaticBody3D" scene_instance_id=1]
 script = ExtResource("1")
