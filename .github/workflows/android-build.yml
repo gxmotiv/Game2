@@ -20,6 +20,10 @@ jobs:
     name: Build Android Debug APK
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ github.workspace }}
 
     steps:
       - name: Checkout repository
@@ -32,7 +36,12 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
-          cache: 'gradle'
+          # No Gradle cache - this is a Godot project, not a Gradle project
+
+      - name: Verify project files
+        run: |
+          ls -la project.godot export_presets.cfg
+          ls -la assets/textures/icon.png
 
       - name: Install system dependencies
         run: |
@@ -66,7 +75,7 @@ jobs:
           chmod +x godot
           echo "$HOME/godot" >> $GITHUB_PATH
 
-      - name: Download Godot export templates
+      - name: Download and install Godot export templates
         run: |
           cd $HOME/godot
           wget -q "${{ env.GODOT_TEMPLATES_URL }}" -O templates.tpz
@@ -77,32 +86,44 @@ jobs:
             mv $HOME/.local/share/godot/export_templates/4.3.stable/templates/* $HOME/.local/share/godot/export_templates/4.3.stable/
             rmdir $HOME/.local/share/godot/export_templates/4.3.stable/templates
           fi
-          ls -la $HOME/.local/share/godot/export_templates/4.3.stable/
+          # Verify required Android templates exist
+          if [ ! -f "$HOME/.local/share/godot/export_templates/4.3.stable/android_debug.apk" ] || [ ! -f "$HOME/.local/share/godot/export_templates/4.3.stable/android_release.apk" ]; then
+            echo "ERROR: Required Android export templates not found"
+            ls -la $HOME/.local/share/godot/export_templates/4.3.stable/
+            exit 1
+          fi
+          echo "Export templates verified"
 
       - name: Configure Godot editor settings
         run: |
           mkdir -p $HOME/.config/godot
+          # Use JAVA_HOME from setup-java (points to Temurin JDK)
+          if [ -z "$JAVA_HOME" ] || [ ! -f "$JAVA_HOME/bin/java" ]; then
+            echo "ERROR: JAVA_HOME not set or invalid"
+            exit 1
+          fi
           printf '%s\n' \
-            '[gd_resource type="EditorSettings" load_steps=2 format=3]' \
-            '' \
-            '[ext_resource type="Script" path="res://scripts/editor_settings.gd" id="1"]' \
+            '[gd_resource type="EditorSettings" load_steps=1 format=3]' \
             '' \
             '[resource]' \
             'export/android/adb = ""' \
-            'export/android/jdk_path = "/usr/lib/jvm/java-21-openjdk-amd64"' \
-            'export/android/sdk_path = "/home/runner/android-sdk"' \
+            "export/android/jdk_path = \"$JAVA_HOME\"" \
+            "export/android/sdk_path = \"$HOME/android-sdk\"" \
             'run/main_scene = "res://scenes/main/main.tscn"' \
             > $HOME/.config/godot/editor_settings-4.tres
 
-      - name: Verify project structure
-        run: |
-          ls -la /workspace/app/
-          ls -la /workspace/app/assets/textures/
-
       - name: Build Android Debug APK
         run: |
-          cd /workspace/app
-          godot --headless --export-release "Android Debug" build/android/veil_circuit_debug.apk
+          godot --headless --export-release "Android Debug" build/android/veil_circuit_debug.apk 2>&1
+          # Fail immediately if export failed
+          if [ ! -f build/android/veil_circuit_debug.apk ]; then
+            echo "ERROR: APK not created. Godot export failed."
+            exit 1
+          fi
+          if [ ! -s build/android/veil_circuit_debug.apk ]; then
+            echo "ERROR: APK file is empty"
+            exit 1
+          fi
           ls -la build/android/
 
       - name: Upload APK artifact
@@ -111,14 +132,9 @@ jobs:
           name: veil-circuit-debug-apk
           path: build/android/veil_circuit_debug.apk
           retention-days: 30
+          if-no-files-found: error
 
       - name: Report APK info
-        if: always()
         run: |
-          if [ -f build/android/veil_circuit_debug.apk ]; then
-            echo "APK size: $(stat -c%s build/android/veil_circuit_debug.apk) bytes"
-            echo "APK SHA256: $(sha256sum build/android/veil_circuit_debug.apk)"
-          else
-            echo "APK not found - build may have failed"
-            exit 1
-          fi
+          echo "APK size: $(stat -c%s build/android/veil_circuit_debug.apk) bytes"
+          echo "APK SHA256: $(sha256sum build/android/veil_circuit_debug.apk)"
