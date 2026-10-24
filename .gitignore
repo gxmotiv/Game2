@@ -1,0 +1,102 @@
+# Godot 4.x
+.godot/
+**/.godot/
+
+# Exported projects
+*.apk
+*.aab
+*.ipa
+*.exe
+*.app
+*.dmg
+*.pck
+*.zip
+
+# Build outputs
+build/
+export/
+bin/
+obj/
+
+# Android
+local.properties
+.gradle/
+captures/
+*.keystore
+*.jks
+keystore.properties
+signing.properties
+
+# Gradle
+**/build/
+**/.gradle/
+gradle.properties
+gradlew
+gradlew.bat
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+*.tmp
+
+# Godot specific
+*.uid
+*.translation
+.import/
+*.cfg.bak
+
+# User data
+user://
+data/user_data/
+
+# Editor settings
+editor_settings-3.tres
+project_settings-3.tres
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+
+# Android SDK
+/android-sdk/
+/android-ndk/
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+.venv
+venv/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test outputs
+test-results/
+coverage/
+*.lcov
+
+# OS
+ehthumbs.db
+Desktop.ini
