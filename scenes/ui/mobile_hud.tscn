@@ -111,12 +111,21 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -220.0
+offset_left = -300.0
 offset_top = -180.0
 offset_right = -20.0
 offset_bottom = -20.0
 alignment = 2
 theme_override_constants/separation = 20
+
+[node name="InteractButton" type="TouchButton" parent="ButtonContainer" script=ExtResource("2")]
+action_name = "interact"
+custom_styles/normal = SubResource("5")
+text = "INTERACT"
+theme_override_font_sizes/font_size = 14
+custom_colors/font_color = Color(1, 1, 1, 1)
+custom_colors/font_outline_color = Color(0, 0, 0, 1)
+mouse_filter = 0
 
 [node name="SprintButton" type="TouchButton" parent="ButtonContainer" script=ExtResource("2")]
 action_name = "sprint"

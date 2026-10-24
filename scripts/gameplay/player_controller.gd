@@ -23,6 +23,10 @@ class_name PlayerController
 @export var standing_height: float = 1.8
 @export var stance_change_speed: float = 10.0
 
+@export_group("Interaction")
+@export var interaction_range: float = 2.5
+@export var interaction_check_interval: float = 0.1
+
 var _target_velocity: Vector3 = Vector3.ZERO
 var _is_sprinting: bool = false
 var _is_crouching: bool = false
@@ -34,6 +38,13 @@ var _mesh: MeshInstance3D
 var _capsule_shape: CapsuleShape3D
 var _mesh_height: float = 1.8
 
+# Interaction
+var _interaction_timer: float = 0.0
+var _current_interactable: Node3D
+var _interaction_prompt: Label3D
+var _in_puzzle: bool = false
+var _hacking_puzzle: CanvasLayer
+
 func _ready() -> void:
 	_camera_pivot = get_node("CameraPivot")
 	_camera = _camera_pivot.get_node("Camera3D")
@@ -44,6 +55,12 @@ func _ready() -> void:
 	
 	_setup_camera()
 	_setup_input()
+	
+	# Find hacking puzzle in scene tree
+	_hacking_puzzle = get_tree().root.find_child("HackingPuzzle", true, false)
+	if not _hacking_puzzle:
+		_hacking_puzzle = preload("res://scenes/ui/hacking_puzzle.tscn").instantiate()
+		get_tree().root.add_child(_hacking_puzzle)
 
 func _setup_camera() -> void:
 	_camera.projection = Camera3D.PROJECTION_ORTHOGONAL
@@ -74,11 +91,17 @@ func _setup_input() -> void:
 	InputManager.register_custom_action("crouch", InputManager.ACTION_TYPE_BUTTON, 0.5, [
 		{"type": "InputEventKey", "physical_keycode": 341}
 	])
+	InputManager.register_custom_action("interact", InputManager.ACTION_TYPE_BUTTON, 0.5, [
+		{"type": "InputEventKey", "physical_keycode": 69},
+		{"type": "InputEventKey", "physical_keycode": 32},
+		{"type": "InputEventJoypadButton", "button_index": 0}
+	])
 
 func _physics_process(delta: float) -> void:
 	_handle_movement(delta)
 	_handle_stance(delta)
 	_update_camera(delta)
+	_check_interaction(delta)
 	move_and_slide()
 
 func _handle_movement(delta: float) -> void:
@@ -152,3 +175,76 @@ func _update_camera(delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and event.physical_keycode == KEY_ESCAPE:
 		get_tree().paused = not get_tree().paused
+
+func _check_interaction(delta: float) -> void:
+	_interaction_timer += delta
+	if _interaction_timer < interaction_check_interval:
+		return
+	_interaction_timer = 0.0
+	
+	if _in_puzzle:
+		return
+	
+	# Raycast forward to find interactables
+	var camera = _camera
+	if not camera:
+		return
+	
+	var from = camera.global_position
+	var to = from + -camera.global_transform.basis.z * interaction_range
+	
+	var space_state = get_world_3d().direct_space_state
+	var query = PhysicsRayQueryParameters3D.create(from, to)
+	query.collision_mask = 1
+	query.exclude = [get_instance_id()]
+	
+	var result = space_state.intersect_ray(query)
+	
+	if result:
+		var collider = result.get_collider()
+		if collider and collider.is_in_group("hackable"):
+			_current_interactable = collider
+			if collider.has_method("get_player_in_range") and not collider.get_player_in_range():
+				collider.call("try_start_hack")  # This will trigger the prompt
+			_try_interact(collider)
+			return
+	
+	_current_interactable = null
+
+func _try_interact(interactable: Node3D) -> void:
+	if InputManager.is_interacting():
+		if interactable.has_method("try_start_hack"):
+			var success = interactable.try_start_hack()
+			if success:
+				_enter_puzzle(interactable)
+
+func _enter_puzzle(terminal: Node3D) -> void:
+	if _in_puzzle:
+		return
+	
+	_in_puzzle = true
+	
+	if _hacking_puzzle and _hacking_puzzle.has_method("start_puzzle"):
+		_hacking_puzzle.start_puzzle(terminal)
+		_hacking_puzzle.puzzle_completed.connect(_on_puzzle_completed)
+	
+	# Disable player movement during puzzle
+	set_process(false)
+	set_physics_process(false)
+	set_process_input(false)
+
+func _on_puzzle_completed(success: bool) -> void:
+	_in_puzzle = false
+	
+	# Re-enable player
+	set_process(true)
+	set_physics_process(true)
+	set_process_input(true)
+	
+	if _hacking_puzzle:
+		_hacking_puzzle.puzzle_completed.disconnect(_on_puzzle_completed)
+	
+	if success:
+		print("Hack successful!")
+	else:
+		print("Hack failed!")
