@@ -1,0 +1,108 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/player_controller.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/player/player.tscn" id="2"]
+
+[sub_resource type="BoxShape3D" id="3"]
+size = Vector3(20.0, 1.0, 20.0)
+
+[sub_resource type="BoxShape3D" id="4"]
+size = Vector3(20.0, 10.0, 1.0)
+
+[sub_resource type="BoxShape3D" id="5"]
+size = Vector3(1.0, 10.0, 20.0)
+
+[sub_resource type="BoxMesh" id="6"]
+size = Vector3(20.0, 1.0, 20.0)
+
+[sub_resource type="BoxMesh" id="7"]
+size = Vector3(20.0, 10.0, 1.0)
+
+[sub_resource type="BoxMesh" id="8"]
+size = Vector3(1.0, 10.0, 20.0)
+
+[sub_resource type="StandardMaterial3D" id="9"]
+albedo_color = Color(0.3, 0.3, 0.35, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="10"]
+albedo_color = Color(0.4, 0.4, 0.45, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="11"]
+albedo_color = Color(0.25, 0.25, 0.3, 1.0)
+
+[node name="TestRoom" type="Node3D" scene_instance_id=1]
+
+[node name="Floor" type="StaticBody3D" parent="."]
+position = Vector3(0, -0.5, 0)
+
+[node name="FloorCollision" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("3")
+
+[node name="FloorMesh" type="MeshInstance3D" parent="Floor"]
+mesh = SubResource("6")
+material_override = SubResource("9")
+
+[node name="WallNorth" type="StaticBody3D" parent="."]
+position = Vector3(0, 4.5, -10.0)
+
+[node name="WallNorthCollision" type="CollisionShape3D" parent="WallNorth"]
+shape = SubResource("4")
+
+[node name="WallNorthMesh" type="MeshInstance3D" parent="WallNorth"]
+mesh = SubResource("7")
+material_override = SubResource("10")
+position = Vector3(0, 0.0, 0.5)
+
+[node name="WallSouth" type="StaticBody3D" parent="."]
+position = Vector3(0, 4.5, 10.0)
+rotation = Vector3(0, 3.14159, 0)
+
+[node name="WallSouthCollision" type="CollisionShape3D" parent="WallSouth"]
+shape = SubResource("4")
+
+[node name="WallSouthMesh" type="MeshInstance3D" parent="WallSouth"]
+mesh = SubResource("7")
+material_override = SubResource("10")
+position = Vector3(0, 0.0, 0.5)
+
+[node name="WallEast" type="StaticBody3D" parent="."]
+position = Vector3(10.0, 4.5, 0)
+rotation = Vector3(0, 1.5708, 0)
+
+[node name="WallEastCollision" type="CollisionShape3D" parent="WallEast"]
+shape = SubResource("5")
+
+[node name="WallEastMesh" type="MeshInstance3D" parent="WallEast"]
+mesh = SubResource("8")
+material_override = SubResource("10")
+position = Vector3(0, 0.0, 0.5)
+
+[node name="WallWest" type="StaticBody3D" parent="."]
+position = Vector3(-10.0, 4.5, 0)
+rotation = Vector3(0, -1.5708, 0)
+
+[node name="WallWestCollision" type="CollisionShape3D" parent="WallWest"]
+shape = SubResource("5")
+
+[node name="WallWestMesh" type="MeshInstance3D" parent="WallWest"]
+mesh = SubResource("8")
+material_override = SubResource("10")
+position = Vector3(0, 0.0, 0.5)
+
+[node name="Ceiling" type="StaticBody3D" parent="."]
+position = Vector3(0, 10.0, 0)
+
+[node name="CeilingCollision" type="CollisionShape3D" parent="Ceiling"]
+shape = SubResource("3")
+
+[node name="CeilingMesh" type="MeshInstance3D" parent="Ceiling"]
+mesh = SubResource("6")
+material_override = SubResource("11")
+rotation = Vector3(3.14159, 0, 0)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+light_color = Color(1.0, 0.95, 0.9, 1.0)
+light_energy = 1.0
+light_size = 0.5
+shadow_enabled = false
+rotation = Vector3(-0.785398, 0.785398, 0)
