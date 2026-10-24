@@ -1,5 +1,5 @@
 extends CharacterBody3D
-class_name GuardAI
+class_name Guard
 
 signal state_changed(new_state: int)
 signal suspicion_changed(value: float)
@@ -57,8 +57,8 @@ var _search_timer: float = 0.0
 var _detection_timer: float = 0.0
 var _player_visible: bool = false
 var _player_node: Node3D
-var _guard_id: int = 0
 var _stealth_system: Variant
+var _guard_id: int
 
 func _ready() -> void:
 	_stealth_system = Engine.get_singleton("StealthSystem")
@@ -262,8 +262,7 @@ func _change_state(new_state: int) -> void:
 		_stealth_system.call("update_guard_state", _guard_id, _state)
 
 func _on_state_changed(old_state: int, new_state: int) -> void:
-	# Debug
-	pass
+	pass # Debug
 
 func _handle_movement(delta: float) -> void:
 	if _target_position == Vector3.ZERO:
