@@ -82,15 +82,25 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 
 func _handle_movement(delta: float) -> void:
-	var input_dir = InputManager.get_movement_vector()
+	# Combine keyboard/joypad input with touch input
+	var kb_input = InputManager.get_movement_vector()
+	var touch_input = InputManager.get_touch_move_vector()
+	
+	# Touch input takes priority when active (non-zero)
+	var input_dir = touch_input if touch_input.length() > 0 else kb_input
 	
 	if input_dir.length() > 0:
 		input_dir = input_dir.normalized()
 	
 	var current_speed = walk_speed
-	if _is_sprinting and not _is_crouching:
+	# Sprint: keyboard/joypad OR touch
+	var is_sprint = InputManager.is_sprinting() or InputManager.is_touch_sprinting()
+	# Crouch: keyboard/joypad OR touch
+	var is_crouch = InputManager.is_crouching() or InputManager.is_touch_crouching()
+	
+	if is_sprint and not is_crouch:
 		current_speed = sprint_speed
-	elif _is_crouching:
+	elif is_crouch:
 		current_speed = crouch_speed
 	
 	var target_speed = input_dir * current_speed
@@ -108,11 +118,16 @@ func _handle_movement(delta: float) -> void:
 	velocity = _target_velocity
 
 func _handle_stance(delta: float) -> void:
-	_is_sprinting = InputManager.is_sprinting()
+	_is_sprinting = InputManager.is_sprinting() or InputManager.is_touch_sprinting()
 	
 	var was_crouching = _is_crouching
+	# Check keyboard/joypad crouch press
 	if InputManager.is_action_just_pressed("crouch"):
 		_is_crouching = not _is_crouching
+	# Touch crouch is toggle-based, sync with touch button state
+	var touch_crouch = InputManager.is_touch_crouching()
+	if touch_crouch != _is_crouching:
+		_is_crouching = touch_crouch
 	
 	var target_height = crouch_height if _is_crouching else standing_height
 	

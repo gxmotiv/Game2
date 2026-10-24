@@ -1,0 +1,101 @@
+extends Control
+class_name VirtualJoystick
+
+signal axis_changed(vector: Vector2)
+
+@export var deadzone: float = 0.15
+@export var max_radius: float = 80.0
+@export var visual_radius: float = 60.0
+@export var stick_snap_speed: float = 15.0
+
+var _center_pos: Vector2 = Vector2.ZERO
+var _current_vector: Vector2 = Vector2.ZERO
+var _dragging: bool = false
+var _touch_id: int = -1
+var _stick_node: Control
+var _base_node: Control
+
+func _ready() -> void:
+	_stick_node = get_node("Stick")
+	_base_node = get_node("Base")
+	_center_pos = _base_node.position + _base_node.size * 0.5
+	_hide_stick()
+	
+	# Connect to InputManager
+	if InputManager:
+		pass  # Will call InputManager.set_touch_move_vector in _update_stick_position
+
+func _hide_stick() -> void:
+	_stick_node.visible = false
+	_base_node.modulate = Color(1, 1, 1, 0.3)
+	_reset_stick_internal()
+
+func _show_stick() -> void:
+	_stick_node.visible = true
+	_base_node.modulate = Color(1, 1, 1, 0.6)
+
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch:
+		_handle_touch(event)
+	elif event is InputEventScreenDrag:
+		_handle_drag(event)
+
+func _handle_touch(event: InputEventScreenTouch) -> void:
+	var local_pos = _base_node.get_local_mouse_position()
+	var distance = local_pos.distance_to(_base_node.size * 0.5)
+	
+	if event.pressed and distance <= visual_radius:
+		_dragging = true
+		_touch_id = event.index
+		_show_stick()
+		_update_stick_position(local_pos)
+	elif not event.pressed and event.index == _touch_id:
+		_dragging = false
+		_touch_id = -1
+		_reset_stick()
+
+func _handle_drag(event: InputEventScreenDrag) -> void:
+	if _dragging and event.index == _touch_id:
+		var local_pos = _base_node.get_local_mouse_position()
+		_update_stick_position(local_pos)
+
+func _update_stick_position(screen_pos: Vector2) -> void:
+	var relative = screen_pos - _base_node.size * 0.5
+	var distance = relative.length()
+	
+	if distance > visual_radius:
+		relative = relative.normalized() * visual_radius
+		distance = visual_radius
+	
+	var stick_pos = _base_node.size * 0.5 + relative
+	_stick_node.position = stick_pos
+	
+	if distance > deadzone * visual_radius:
+		var strength = (distance - deadzone * visual_radius) / (visual_radius * (1.0 - deadzone))
+		_current_vector = relative.normalized() * strength
+	else:
+		_current_vector = Vector2.ZERO
+	
+	if InputManager:
+		InputManager.set_touch_move_vector(_current_vector)
+	
+	axis_changed.emit(_current_vector)
+
+func _reset_stick() -> void:
+	_reset_stick_internal()
+
+func _reset_stick_internal() -> void:
+	_dragging = false
+	_touch_id = -1
+	_current_vector = Vector2.ZERO
+	_stick_node.position = _base_node.size * 0.5
+	_hide_stick()
+	if InputManager:
+		InputManager.set_touch_move_vector(Vector2.ZERO)
+	axis_changed.emit(Vector2.ZERO)
+
+func get_vector() -> Vector2:
+	return _current_vector
+
+func is_dragging() -> bool:
+	return _dragging
