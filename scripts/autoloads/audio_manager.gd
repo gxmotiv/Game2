@@ -25,12 +25,18 @@ var _music_library: Dictionary = {}
 var _ambient_library: Dictionary = {}
 var _voice_library: Dictionary = {}
 var _as: Variant
+var _buses_ready: bool = false
 
 func _ready() -> void:
 	_as = Engine.get_singleton("AudioServer")
-	_setup_audio_buses()
 	_init_sfx_pool()
 	_create_players()
+	
+	# Defer bus setup to ensure AudioServer is fully initialized
+	call_deferred("_setup_audio_buses_deferred")
+
+func _setup_audio_buses_deferred() -> void:
+	_setup_audio_buses()
 
 func _setup_audio_buses() -> void:
 	if not _as or not _as.has_method("has_bus"):
@@ -45,6 +51,8 @@ func _setup_audio_buses() -> void:
 			var idx = _as.call("add_bus", bus_name)
 			var master_idx = _as.call("get_bus_index", master_bus_name)
 			_as.call("set_bus_send", idx, master_idx, true)
+	
+	_buses_ready = true
 
 func _init_sfx_pool() -> void:
 	for i in range(max_sfx_instances):
@@ -200,53 +208,63 @@ func _call_as(method: String, arg1: Variant = null, arg2: Variant = null, arg3: 
 	return null
 
 func set_master_volume(volume_db: float) -> void:
-	var idx = _call_as("get_bus_index", master_bus_name)
-	if idx is int:
-		_call_as("set_bus_volume_db", idx, volume_db)
+	if _buses_ready:
+		var idx = _call_as("get_bus_index", master_bus_name)
+		if idx is int:
+			_call_as("set_bus_volume_db", idx, volume_db)
 
 func set_sfx_volume(volume_db: float) -> void:
-	var idx = _call_as("get_bus_index", sfx_bus_name)
-	if idx is int:
-		_call_as("set_bus_volume_db", idx, volume_db)
+	if _buses_ready:
+		var idx = _call_as("get_bus_index", sfx_bus_name)
+		if idx is int:
+			_call_as("set_bus_volume_db", idx, volume_db)
 
 func set_music_volume(volume_db: float) -> void:
-	var idx = _call_as("get_bus_index", music_bus_name)
-	if idx is int:
-		_call_as("set_bus_volume_db", idx, volume_db)
+	if _buses_ready:
+		var idx = _call_as("get_bus_index", music_bus_name)
+		if idx is int:
+			_call_as("set_bus_volume_db", idx, volume_db)
 
 func set_voice_volume(volume_db: float) -> void:
-	var idx = _call_as("get_bus_index", voice_bus_name)
-	if idx is int:
-		_call_as("set_bus_volume_db", idx, volume_db)
+	if _buses_ready:
+		var idx = _call_as("get_bus_index", voice_bus_name)
+		if idx is int:
+			_call_as("set_bus_volume_db", idx, volume_db)
 
 func set_ambient_volume(volume_db: float) -> void:
-	var idx = _call_as("get_bus_index", ambient_bus_name)
-	if idx is int:
-		_call_as("set_bus_volume_db", idx, volume_db)
+	if _buses_ready:
+		var idx = _call_as("get_bus_index", ambient_bus_name)
+		if idx is int:
+			_call_as("set_bus_volume_db", idx, volume_db)
 
 func get_master_volume() -> float:
-	var idx = _call_as("get_bus_index", master_bus_name)
-	if idx is int:
-		return _call_as("get_bus_volume_db", idx)
+	if _buses_ready:
+		var idx = _call_as("get_bus_index", master_bus_name)
+		if idx is int:
+			return _call_as("get_bus_volume_db", idx)
 	return 0.0
 
 func get_sfx_volume() -> float:
-	var idx = _call_as("get_bus_index", sfx_bus_name)
-	if idx is int:
-		return _call_as("get_bus_volume_db", idx)
+	if _buses_ready:
+		var idx = _call_as("get_bus_index", sfx_bus_name)
+		if idx is int:
+			return _call_as("get_bus_volume_db", idx)
 	return 0.0
 
 func get_music_volume() -> float:
-	var idx = _call_as("get_bus_index", music_bus_name)
-	if idx is int:
-		return _call_as("get_bus_volume_db", idx)
+	if _buses_ready:
+		var idx = _call_as("get_bus_index", music_bus_name)
+		if idx is int:
+			return _call_as("get_bus_volume_db", idx)
 	return 0.0
 
 func pause_all() -> void:
-	_call_as("set_pause", true)
+	if _buses_ready:
+		_call_as("set_pause", true)
 
 func resume_all() -> void:
-	_call_as("set_pause", false)
+	if _buses_ready:
+		_call_as("set_pause", false)
 
 func stop_all_sfx() -> void:
 	for player in _sfx_pool:

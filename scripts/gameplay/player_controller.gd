@@ -31,12 +31,16 @@ var _camera_pivot: Node3D
 var _camera: Camera3D
 var _collision_shape: CollisionShape3D
 var _mesh: MeshInstance3D
+var _capsule_shape: CapsuleShape3D
+var _mesh_height: float = 1.8
 
 func _ready() -> void:
 	_camera_pivot = get_node("CameraPivot")
 	_camera = _camera_pivot.get_node("Camera3D")
 	_collision_shape = get_node("CollisionShape3D")
 	_mesh = get_node("MeshInstance3D")
+	_capsule_shape = _collision_shape.shape as CapsuleShape3D
+	_mesh_height = 1.8
 	
 	_setup_camera()
 	_setup_input()
@@ -106,16 +110,24 @@ func _handle_movement(delta: float) -> void:
 func _handle_stance(delta: float) -> void:
 	_is_sprinting = InputManager.is_sprinting()
 	
+	var was_crouching = _is_crouching
 	if InputManager.is_action_just_pressed("crouch"):
 		_is_crouching = not _is_crouching
 	
 	var target_height = crouch_height if _is_crouching else standing_height
-	var shape = _collision_shape.shape
-	if shape and shape is CapsuleShape3D:
-		shape.height = target_height
 	
+	if _capsule_shape:
+		var height_diff = _capsule_shape.height - target_height
+		_capsule_shape.height = target_height
+		
+		if _is_crouching and not was_crouching:
+			position.y -= height_diff * 0.5
+		elif not _is_crouching and was_crouching:
+			position.y += height_diff * 0.5
+	
+	var scale_target = target_height / _mesh_height
 	var mesh_scale = _mesh.scale
-	mesh_scale.y = lerp(mesh_scale.y, target_height / 2.0, stance_change_speed * delta)
+	mesh_scale.y = lerp(mesh_scale.y, scale_target, stance_change_speed * delta)
 	_mesh.scale = mesh_scale
 
 func _update_camera(delta: float) -> void:
