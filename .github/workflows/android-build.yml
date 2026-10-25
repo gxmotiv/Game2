@@ -143,6 +143,20 @@ jobs:
           test -f "$JAVA_HOME/bin/java"
           test -f "$HOME/.android/debug.keystore"
 
+      - name: Validate Godot project and boot scene
+        run: |
+          set -o pipefail
+          godot --headless --editor --path "$GITHUB_WORKSPACE" --quit 2>&1 | tee /tmp/godot-import.log
+          if grep -E "SCRIPT ERROR:|Parse Error|Cannot get class|Parent path .* vanished|ERROR: Failed loading" /tmp/godot-import.log; then
+            echo "ERROR: Godot editor import reported scene or script errors."
+            exit 1
+          fi
+          godot --headless --path "$GITHUB_WORKSPACE" --quit-after 5 2>&1 | tee /tmp/godot-boot.log
+          if grep -E "SCRIPT ERROR:|Parse Error|Cannot get class|Parent path .* vanished|ERROR: Failed loading|Invalid assignment of property" /tmp/godot-boot.log; then
+            echo "ERROR: Main scene boot test found script or scene loading errors."
+            exit 1
+          fi
+
       - name: Build Android Debug APK
         run: |
           set -e
