@@ -21,7 +21,7 @@ func _ready() -> void:
 	if light_mesh and light_mesh.material_override:
 		_original_mesh_color = light_mesh.material_override.albedo_color
 		if light_mesh.material_override.emission_enabled:
-			_original_emission = light_mesh.material_override.emission_color
+			_original_emission = light_mesh.material_override.emission
 	
 	# Start as active (red)
 	_set_active(true)
@@ -42,7 +42,7 @@ func _set_active(active: bool) -> void:
 	if light_mesh and light_mesh.material_override:
 		light_mesh.material_override.albedo_color = active_color if active else disabled_color
 		if light_mesh.material_override.emission_enabled:
-			light_mesh.material_override.emission_color = active_emission if active else disabled_emission
+			light_mesh.material_override.emission = active_emission if active else disabled_emission
 			light_mesh.material_override.emission_energy_multiplier = 2.0 if active else 0.2
 
 func is_disabled() -> bool:
