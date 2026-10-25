@@ -25,6 +25,7 @@ window/permit/allow_hidpi=true
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true
 rendering/quality/shadows/enable=false
 rendering/quality/shadows/atlas_size=1024
 rendering/quality/shadows/directional_shadow_count=1
