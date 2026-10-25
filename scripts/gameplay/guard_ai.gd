@@ -332,7 +332,7 @@ func _create_material(color: Color) -> StandardMaterial3D:
 	mat.albedo_color = color
 	mat.emission_enabled = true
 	mat.emission_energy_multiplier = 0.5
-	mat.emission_color = color
+	mat.emission = color
 	mat.transparency = StandardMaterial3D.TRANSPARENCY_ALPHA
 	mat.render_priority = 1
 	return mat
