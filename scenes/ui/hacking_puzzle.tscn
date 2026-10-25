@@ -130,7 +130,7 @@ anchor_bottom = 1.0
 offset_left = 20.0
 offset_top = 70.0
 offset_right = -20.0
-offset_bottom = 80.0
+offset_bottom = -65.0
 columns = 4
 theme_override_constants/h_separation = 8
 theme_override_constants/v_separation = 8
@@ -141,7 +141,7 @@ theme_override_styles/hover = SubResource("4")
 theme_override_styles/pressed = SubResource("5")
 theme_override_styles/focus = SubResource("6")
 stretch_mode = 1
-theme_override_constants/focus_border = 0
+custom_minimum_size = Vector2(64, 64)
 mouse_filter = 1
 
 [node name="PuzzleNode1" type="TextureButton" parent="PuzzleContainer/GridContainer"]
@@ -150,7 +150,7 @@ theme_override_styles/hover = SubResource("4")
 theme_override_styles/pressed = SubResource("5")
 theme_override_styles/focus = SubResource("6")
 stretch_mode = 1
-theme_override_constants/focus_border = 0
+custom_minimum_size = Vector2(64, 64)
 mouse_filter = 1
 
 [node name="PuzzleNode2" type="TextureButton" parent="PuzzleContainer/GridContainer"]
@@ -159,7 +159,7 @@ theme_override_styles/hover = SubResource("4")
 theme_override_styles/pressed = SubResource("5")
 theme_override_styles/focus = SubResource("6")
 stretch_mode = 1
-theme_override_constants/focus_border = 0
+custom_minimum_size = Vector2(64, 64)
 mouse_filter = 1
 
 [node name="PuzzleNode3" type="TextureButton" parent="PuzzleContainer/GridContainer"]
@@ -168,7 +168,7 @@ theme_override_styles/hover = SubResource("4")
 theme_override_styles/pressed = SubResource("5")
 theme_override_styles/focus = SubResource("6")
 stretch_mode = 1
-theme_override_constants/focus_border = 0
+custom_minimum_size = Vector2(64, 64)
 mouse_filter = 1
 
 [node name="PuzzleNode4" type="TextureButton" parent="PuzzleContainer/GridContainer"]
@@ -177,7 +177,7 @@ theme_override_styles/hover = SubResource("4")
 theme_override_styles/pressed = SubResource("5")
 theme_override_styles/focus = SubResource("6")
 stretch_mode = 1
-theme_override_constants/focus_border = 0
+custom_minimum_size = Vector2(64, 64)
 mouse_filter = 1
 
 [node name="PuzzleNode5" type="TextureButton" parent="PuzzleContainer/GridContainer"]
@@ -186,7 +186,7 @@ theme_override_styles/hover = SubResource("4")
 theme_override_styles/pressed = SubResource("5")
 theme_override_styles/focus = SubResource("6")
 stretch_mode = 1
-theme_override_constants/focus_border = 0
+custom_minimum_size = Vector2(64, 64)
 mouse_filter = 1
 
 [node name="PuzzleNode6" type="TextureButton" parent="PuzzleContainer/GridContainer"]
@@ -195,7 +195,7 @@ theme_override_styles/hover = SubResource("4")
 theme_override_styles/pressed = SubResource("5")
 theme_override_styles/focus = SubResource("6")
 stretch_mode = 1
-theme_override_constants/focus_border = 0
+custom_minimum_size = Vector2(64, 64)
 mouse_filter = 1
 
 [node name="PuzzleNode7" type="TextureButton" parent="PuzzleContainer/GridContainer"]
@@ -204,7 +204,7 @@ theme_override_styles/hover = SubResource("4")
 theme_override_styles/pressed = SubResource("5")
 theme_override_styles/focus = SubResource("6")
 stretch_mode = 1
-theme_override_constants/focus_border = 0
+custom_minimum_size = Vector2(64, 64)
 mouse_filter = 1
 
 [node name="PuzzleNode8" type="TextureButton" parent="PuzzleContainer/GridContainer"]
@@ -213,7 +213,7 @@ theme_override_styles/hover = SubResource("4")
 theme_override_styles/pressed = SubResource("5")
 theme_override_styles/focus = SubResource("6")
 stretch_mode = 1
-theme_override_constants/focus_border = 0
+custom_minimum_size = Vector2(64, 64)
 mouse_filter = 1
 
 [node name="PuzzleNode9" type="TextureButton" parent="PuzzleContainer/GridContainer"]
@@ -222,7 +222,7 @@ theme_override_styles/hover = SubResource("4")
 theme_override_styles/pressed = SubResource("5")
 theme_override_styles/focus = SubResource("6")
 stretch_mode = 1
-theme_override_constants/focus_border = 0
+custom_minimum_size = Vector2(64, 64)
 mouse_filter = 1
 
 [node name="PuzzleNode10" type="TextureButton" parent="PuzzleContainer/GridContainer"]
@@ -231,7 +231,7 @@ theme_override_styles/hover = SubResource("4")
 theme_override_styles/pressed = SubResource("5")
 theme_override_styles/focus = SubResource("6")
 stretch_mode = 1
-theme_override_constants/focus_border = 0
+custom_minimum_size = Vector2(64, 64)
 mouse_filter = 1
 
 [node name="PuzzleNode11" type="TextureButton" parent="PuzzleContainer/GridContainer"]
@@ -240,7 +240,7 @@ theme_override_styles/hover = SubResource("4")
 theme_override_styles/pressed = SubResource("5")
 theme_override_styles/focus = SubResource("6")
 stretch_mode = 1
-theme_override_constants/focus_border = 0
+custom_minimum_size = Vector2(64, 64)
 mouse_filter = 1
 
 [node name="PuzzleNode12" type="TextureButton" parent="PuzzleContainer/GridContainer"]
@@ -249,7 +249,7 @@ theme_override_styles/hover = SubResource("4")
 theme_override_styles/pressed = SubResource("5")
 theme_override_styles/focus = SubResource("6")
 stretch_mode = 1
-theme_override_constants/focus_border = 0
+custom_minimum_size = Vector2(64, 64)
 mouse_filter = 1
 
 [node name="PuzzleNode13" type="TextureButton" parent="PuzzleContainer/GridContainer"]
@@ -258,7 +258,7 @@ theme_override_styles/hover = SubResource("4")
 theme_override_styles/pressed = SubResource("5")
 theme_override_styles/focus = SubResource("6")
 stretch_mode = 1
-theme_override_constants/focus_border = 0
+custom_minimum_size = Vector2(64, 64)
 mouse_filter = 1
 
 [node name="PuzzleNode14" type="TextureButton" parent="PuzzleContainer/GridContainer"]
@@ -267,7 +267,7 @@ theme_override_styles/hover = SubResource("4")
 theme_override_styles/pressed = SubResource("5")
 theme_override_styles/focus = SubResource("6")
 stretch_mode = 1
-theme_override_constants/focus_border = 0
+custom_minimum_size = Vector2(64, 64)
 mouse_filter = 1
 
 [node name="PuzzleNode15" type="TextureButton" parent="PuzzleContainer/GridContainer"]
@@ -276,7 +276,7 @@ theme_override_styles/hover = SubResource("4")
 theme_override_styles/pressed = SubResource("5")
 theme_override_styles/focus = SubResource("6")
 stretch_mode = 1
-theme_override_constants/focus_border = 0
+custom_minimum_size = Vector2(64, 64)
 mouse_filter = 1
 
 [node name="ButtonBar" type="HBoxContainer" parent="PuzzleContainer"]
