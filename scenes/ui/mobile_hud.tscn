@@ -125,7 +125,7 @@ text = "INTERACT"
 theme_override_font_sizes/font_size = 14
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-mouse_filter = 2
+mouse_filter = 0
 
 [node name="SprintButton" type="Button" parent="ButtonContainer" script=ExtResource("2")]
 action_name = "sprint"
@@ -134,7 +134,7 @@ text = "SPRINT"
 theme_override_font_sizes/font_size = 14
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-mouse_filter = 2
+mouse_filter = 0
 
 [node name="CrouchButton" type="Button" parent="ButtonContainer" script=ExtResource("2")]
 action_name = "crouch"
