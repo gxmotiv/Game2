@@ -131,10 +131,10 @@ func _handle_movement(delta: float) -> void:
 	
 	if is_on_floor():
 		_target_velocity.x = lerp(_target_velocity.x, target_speed.x, acceleration * delta)
-		_target_velocity.z = lerp(_target_velocity.z, target_speed.z, acceleration * delta)
+		_target_velocity.z = lerp(_target_velocity.z, target_speed.y, acceleration * delta)
 	else:
 		_target_velocity.x = lerp(_target_velocity.x, target_speed.x, air_acceleration * delta)
-		_target_velocity.z = lerp(_target_velocity.z, target_speed.z, air_acceleration * delta)
+		_target_velocity.z = lerp(_target_velocity.z, target_speed.y, air_acceleration * delta)
 	
 	if not is_on_floor():
 		_target_velocity.y -= gravity * delta
