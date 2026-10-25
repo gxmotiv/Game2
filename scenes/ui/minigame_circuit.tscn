@@ -1,7 +1,6 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/hacking_puzzle.gd" id="1"]
-[ext_resource type="PackedScene" path="res://scenes/ui/minigame_circuit.tscn" id="2"]
 
 [sub_resource type="StyleBoxFlat" id="3"]
 bg_color = Color(0.05, 0.08, 0.12, 0.95)
@@ -88,7 +87,7 @@ offset_left = -200.0
 offset_top = -180.0
 offset_right = 200.0
 offset_bottom = 180.0
-custom_styles/panel = SubResource("3")
+theme_override_styles/panel = SubResource("3")
 
 [node name="TitleBar" type="HBoxContainer" parent="PuzzleContainer"]
 layout_mode = 3
@@ -103,21 +102,21 @@ offset_right = -10.0
 offset_bottom = 50.0
 theme_override_constants/separation = 10
 
-[node name="TitleLabel" type="Label" parent="TitleBar"]
+[node name="TitleLabel" type="Label" parent="PuzzleContainer/TitleBar"]
 text = "CIRCUIT BREACH"
 theme_override_font_sizes/font_size = 20
-custom_colors/font_color = Color(0.2, 1.0, 0.4, 1.0)
-custom_colors/font_outline_color = Color(0, 0, 0, 1)
-custom_colors/font_outline_size = 1
+theme_override_colors/font_color = Color(0.2, 1.0, 0.4, 1.0)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_colors/font_outline_size = 1
 horizontal_alignment = 1
 mouse_filter = 0
 
-[node name="TimerLabel" type="Label" parent="TitleBar"]
+[node name="TimerLabel" type="Label" parent="PuzzleContainer/TitleBar"]
 text = "60s"
 theme_override_font_sizes/font_size = 18
-custom_colors/font_color = Color(1.0, 0.8, 0.2, 1.0)
-custom_colors/font_outline_color = Color(0, 0, 0, 1)
-custom_colors/font_outline_size = 1
+theme_override_colors/font_color = Color(1.0, 0.8, 0.2, 1.0)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_colors/font_outline_size = 1
 horizontal_alignment = 2
 mouse_filter = 0
 
@@ -136,148 +135,148 @@ columns = 4
 theme_override_constants/h_separation = 8
 theme_override_constants/v_separation = 8
 
-[node name="PuzzleNode0" type="TextureButton" parent="GridContainer"]
-custom_styles/normal = SubResource("4")
-custom_styles/hover = SubResource("5")
-custom_styles/pressed = SubResource("6")
-custom_styles/focus = SubResource("7")
+[node name="PuzzleNode0" type="TextureButton" parent="PuzzleContainer/GridContainer"]
+theme_override_styles/normal = SubResource("4")
+theme_override_styles/hover = SubResource("5")
+theme_override_styles/pressed = SubResource("6")
+theme_override_styles/focus = SubResource("7")
 stretch_mode = 1
-custom_constants/focus_border = 0
+theme_override_constants/focus_border = 0
 mouse_filter = 1
 
-[node name="PuzzleNode1" type="TextureButton" parent="GridContainer"]
-custom_styles/normal = SubResource("4")
-custom_styles/hover = SubResource("5")
-custom_styles/pressed = SubResource("6")
-custom_styles/focus = SubResource("7")
+[node name="PuzzleNode1" type="TextureButton" parent="PuzzleContainer/GridContainer"]
+theme_override_styles/normal = SubResource("4")
+theme_override_styles/hover = SubResource("5")
+theme_override_styles/pressed = SubResource("6")
+theme_override_styles/focus = SubResource("7")
 stretch_mode = 1
-custom_constants/focus_border = 0
+theme_override_constants/focus_border = 0
 mouse_filter = 1
 
-[node name="PuzzleNode2" type="TextureButton" parent="GridContainer"]
-custom_styles/normal = SubResource("4")
-custom_styles/hover = SubResource("5")
-custom_styles/pressed = SubResource("6")
-custom_styles/focus = SubResource("7")
+[node name="PuzzleNode2" type="TextureButton" parent="PuzzleContainer/GridContainer"]
+theme_override_styles/normal = SubResource("4")
+theme_override_styles/hover = SubResource("5")
+theme_override_styles/pressed = SubResource("6")
+theme_override_styles/focus = SubResource("7")
 stretch_mode = 1
-custom_constants/focus_border = 0
+theme_override_constants/focus_border = 0
 mouse_filter = 1
 
-[node name="PuzzleNode3" type="TextureButton" parent="GridContainer"]
-custom_styles/normal = SubResource("4")
-custom_styles/hover = SubResource("5")
-custom_styles/pressed = SubResource("6")
-custom_styles/focus = SubResource("7")
+[node name="PuzzleNode3" type="TextureButton" parent="PuzzleContainer/GridContainer"]
+theme_override_styles/normal = SubResource("4")
+theme_override_styles/hover = SubResource("5")
+theme_override_styles/pressed = SubResource("6")
+theme_override_styles/focus = SubResource("7")
 stretch_mode = 1
-custom_constants/focus_border = 0
+theme_override_constants/focus_border = 0
 mouse_filter = 1
 
-[node name="PuzzleNode4" type="TextureButton" parent="GridContainer"]
-custom_styles/normal = SubResource("4")
-custom_styles/hover = SubResource("5")
-custom_styles/pressed = SubResource("6")
-custom_styles/focus = SubResource("7")
+[node name="PuzzleNode4" type="TextureButton" parent="PuzzleContainer/GridContainer"]
+theme_override_styles/normal = SubResource("4")
+theme_override_styles/hover = SubResource("5")
+theme_override_styles/pressed = SubResource("6")
+theme_override_styles/focus = SubResource("7")
 stretch_mode = 1
-custom_constants/focus_border = 0
+theme_override_constants/focus_border = 0
 mouse_filter = 1
 
-[node name="PuzzleNode5" type="TextureButton" parent="GridContainer"]
-custom_styles/normal = SubResource("4")
-custom_styles/hover = SubResource("5")
-custom_styles/pressed = SubResource("6")
-custom_styles/focus = SubResource("7")
+[node name="PuzzleNode5" type="TextureButton" parent="PuzzleContainer/GridContainer"]
+theme_override_styles/normal = SubResource("4")
+theme_override_styles/hover = SubResource("5")
+theme_override_styles/pressed = SubResource("6")
+theme_override_styles/focus = SubResource("7")
 stretch_mode = 1
-custom_constants/focus_border = 0
+theme_override_constants/focus_border = 0
 mouse_filter = 1
 
-[node name="PuzzleNode6" type="TextureButton" parent="GridContainer"]
-custom_styles/normal = SubResource("4")
-custom_styles/hover = SubResource("5")
-custom_styles/pressed = SubResource("6")
-custom_styles/focus = SubResource("7")
+[node name="PuzzleNode6" type="TextureButton" parent="PuzzleContainer/GridContainer"]
+theme_override_styles/normal = SubResource("4")
+theme_override_styles/hover = SubResource("5")
+theme_override_styles/pressed = SubResource("6")
+theme_override_styles/focus = SubResource("7")
 stretch_mode = 1
-custom_constants/focus_border = 0
+theme_override_constants/focus_border = 0
 mouse_filter = 1
 
-[node name="PuzzleNode7" type="TextureButton" parent="GridContainer"]
-custom_styles/normal = SubResource("4")
-custom_styles/hover = SubResource("5")
-custom_styles/pressed = SubResource("6")
-custom_styles/focus = SubResource("7")
+[node name="PuzzleNode7" type="TextureButton" parent="PuzzleContainer/GridContainer"]
+theme_override_styles/normal = SubResource("4")
+theme_override_styles/hover = SubResource("5")
+theme_override_styles/pressed = SubResource("6")
+theme_override_styles/focus = SubResource("7")
 stretch_mode = 1
-custom_constants/focus_border = 0
+theme_override_constants/focus_border = 0
 mouse_filter = 1
 
-[node name="PuzzleNode8" type="TextureButton" parent="GridContainer"]
-custom_styles/normal = SubResource("4")
-custom_styles/hover = SubResource("5")
-custom_styles/pressed = SubResource("6")
-custom_styles/focus = SubResource("7")
+[node name="PuzzleNode8" type="TextureButton" parent="PuzzleContainer/GridContainer"]
+theme_override_styles/normal = SubResource("4")
+theme_override_styles/hover = SubResource("5")
+theme_override_styles/pressed = SubResource("6")
+theme_override_styles/focus = SubResource("7")
 stretch_mode = 1
-custom_constants/focus_border = 0
+theme_override_constants/focus_border = 0
 mouse_filter = 1
 
-[node name="PuzzleNode9" type="TextureButton" parent="GridContainer"]
-custom_styles/normal = SubResource("4")
-custom_styles/hover = SubResource("5")
-custom_styles/pressed = SubResource("6")
-custom_styles/focus = SubResource("7")
+[node name="PuzzleNode9" type="TextureButton" parent="PuzzleContainer/GridContainer"]
+theme_override_styles/normal = SubResource("4")
+theme_override_styles/hover = SubResource("5")
+theme_override_styles/pressed = SubResource("6")
+theme_override_styles/focus = SubResource("7")
 stretch_mode = 1
-custom_constants/focus_border = 0
+theme_override_constants/focus_border = 0
 mouse_filter = 1
 
-[node name="PuzzleNode10" type="TextureButton" parent="GridContainer"]
-custom_styles/normal = SubResource("4")
-custom_styles/hover = SubResource("5")
-custom_styles/pressed = SubResource("6")
-custom_styles/focus = SubResource("7")
+[node name="PuzzleNode10" type="TextureButton" parent="PuzzleContainer/GridContainer"]
+theme_override_styles/normal = SubResource("4")
+theme_override_styles/hover = SubResource("5")
+theme_override_styles/pressed = SubResource("6")
+theme_override_styles/focus = SubResource("7")
 stretch_mode = 1
-custom_constants/focus_border = 0
+theme_override_constants/focus_border = 0
 mouse_filter = 1
 
-[node name="PuzzleNode11" type="TextureButton" parent="GridContainer"]
-custom_styles/normal = SubResource("4")
-custom_styles/hover = SubResource("5")
-custom_styles/pressed = SubResource("6")
-custom_styles/focus = SubResource("7")
+[node name="PuzzleNode11" type="TextureButton" parent="PuzzleContainer/GridContainer"]
+theme_override_styles/normal = SubResource("4")
+theme_override_styles/hover = SubResource("5")
+theme_override_styles/pressed = SubResource("6")
+theme_override_styles/focus = SubResource("7")
 stretch_mode = 1
-custom_constants/focus_border = 0
+theme_override_constants/focus_border = 0
 mouse_filter = 1
 
-[node name="PuzzleNode12" type="TextureButton" parent="GridContainer"]
-custom_styles/normal = SubResource("4")
-custom_styles/hover = SubResource("5")
-custom_styles/pressed = SubResource("6")
-custom_styles/focus = SubResource("7")
+[node name="PuzzleNode12" type="TextureButton" parent="PuzzleContainer/GridContainer"]
+theme_override_styles/normal = SubResource("4")
+theme_override_styles/hover = SubResource("5")
+theme_override_styles/pressed = SubResource("6")
+theme_override_styles/focus = SubResource("7")
 stretch_mode = 1
-custom_constants/focus_border = 0
+theme_override_constants/focus_border = 0
 mouse_filter = 1
 
-[node name="PuzzleNode13" type="TextureButton" parent="GridContainer"]
-custom_styles/normal = SubResource("4")
-custom_styles/hover = SubResource("5")
-custom_styles/pressed = SubResource("6")
-custom_styles/focus = SubResource("7")
+[node name="PuzzleNode13" type="TextureButton" parent="PuzzleContainer/GridContainer"]
+theme_override_styles/normal = SubResource("4")
+theme_override_styles/hover = SubResource("5")
+theme_override_styles/pressed = SubResource("6")
+theme_override_styles/focus = SubResource("7")
 stretch_mode = 1
-custom_constants/focus_border = 0
+theme_override_constants/focus_border = 0
 mouse_filter = 1
 
-[node name="PuzzleNode14" type="TextureButton" parent="GridContainer"]
-custom_styles/normal = SubResource("4")
-custom_styles/hover = SubResource("5")
-custom_styles/pressed = SubResource("6")
-custom_styles/focus = SubResource("7")
+[node name="PuzzleNode14" type="TextureButton" parent="PuzzleContainer/GridContainer"]
+theme_override_styles/normal = SubResource("4")
+theme_override_styles/hover = SubResource("5")
+theme_override_styles/pressed = SubResource("6")
+theme_override_styles/focus = SubResource("7")
 stretch_mode = 1
-custom_constants/focus_border = 0
+theme_override_constants/focus_border = 0
 mouse_filter = 1
 
-[node name="PuzzleNode15" type="TextureButton" parent="GridContainer"]
-custom_styles/normal = SubResource("4")
-custom_styles/hover = SubResource("5")
-custom_styles/pressed = SubResource("6")
-custom_styles/focus = SubResource("7")
+[node name="PuzzleNode15" type="TextureButton" parent="PuzzleContainer/GridContainer"]
+theme_override_styles/normal = SubResource("4")
+theme_override_styles/hover = SubResource("5")
+theme_override_styles/pressed = SubResource("6")
+theme_override_styles/focus = SubResource("7")
 stretch_mode = 1
-custom_constants/focus_border = 0
+theme_override_constants/focus_border = 0
 mouse_filter = 1
 
 [node name="ButtonBar" type="HBoxContainer" parent="PuzzleContainer"]
@@ -294,18 +293,18 @@ offset_bottom = -10.0
 alignment = 1
 theme_override_constants/separation = 15
 
-[node name="HintButton" type="Button" parent="ButtonBar"]
+[node name="HintButton" type="Button" parent="PuzzleContainer/ButtonBar"]
 text = "HINT"
 theme_override_font_sizes/font_size = 14
-custom_styles/normal = SubResource("8")
-custom_colors/font_color = Color(0.8, 0.8, 1.0, 1.0)
-custom_colors/font_outline_color = Color(0, 0, 0, 1)
-custom_colors/font_outline_size = 1
+theme_override_styles/normal = SubResource("8")
+theme_override_colors/font_color = Color(0.8, 0.8, 1.0, 1.0)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_colors/font_outline_size = 1
 
-[node name="ExitButton" type="Button" parent="ButtonBar"]
+[node name="ExitButton" type="Button" parent="PuzzleContainer/ButtonBar"]
 text = "ABORT"
 theme_override_font_sizes/font_size = 14
-custom_styles/normal = SubResource("6")
-custom_colors/font_color = Color(1.0, 0.5, 0.5, 1.0)
-custom_colors/font_outline_color = Color(0, 0, 0, 1)
-custom_colors/font_outline_size = 1
+theme_override_styles/normal = SubResource("6")
+theme_override_colors/font_color = Color(1.0, 0.5, 0.5, 1.0)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_colors/font_outline_size = 1
