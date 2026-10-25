@@ -31,11 +31,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup JDK 21
+      - name: Setup JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '17'
           # No Gradle cache - this is a Godot project, not a Gradle project
 
       - name: Verify project files
@@ -115,8 +115,8 @@ jobs:
             echo ''
             echo '[resource]'
             echo 'export/android/adb = ""'
-            echo "export/android/jdk_path = \"$JAVA_HOME\""
-            echo "export/android/sdk_path = \"$HOME/android-sdk\""
+            echo "export/android/java_sdk_path = \"$JAVA_HOME\""
+            echo "export/android/android_sdk_path = \"$HOME/android-sdk\""
             echo 'run/main_scene = "res://scenes/main/main.tscn"'
           } > $HOME/.config/godot/editor_settings-4.tres
 
@@ -124,13 +124,36 @@ jobs:
         run: |
           cat $HOME/.config/godot/editor_settings-4.tres
 
+      - name: Prepare Android debug signing
+        run: |
+          mkdir -p "$HOME/.android"
+          if [ ! -f "$HOME/.android/debug.keystore" ]; then
+            keytool -genkeypair -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          fi
+          {
+            echo "GODOT_ANDROID_KEYSTORE_DEBUG_PATH=$HOME/.android/debug.keystore"
+            echo "GODOT_ANDROID_KEYSTORE_DEBUG_USER=androiddebugkey"
+            echo "GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=android"
+          } >> "$GITHUB_ENV"
+
+      - name: Verify Android SDK paths
+        run: |
+          test -f "$HOME/android-sdk/platforms/android-34/android.jar"
+          test -x "$HOME/android-sdk/build-tools/34.0.0/apksigner"
+          test -f "$JAVA_HOME/bin/java"
+          test -f "$HOME/.android/debug.keystore"
+
+      - name: Validate Godot project scripts
+        run: |
+          godot --headless --path "$GITHUB_WORKSPACE" --check-only
+
       - name: Build Android Debug APK
         run: |
           set -e
+          mkdir -p build/android
           export ANDROID_HOME="$HOME/android-sdk"
           export ANDROID_SDK_ROOT="$HOME/android-sdk"
-          export JAVA_HOME="$JAVA_HOME"
-          godot --headless --verbose --export-debug "Android Debug" build/android/veil_circuit_debug.apk --editor-settings $HOME/.config/godot/editor_settings-4.tres 2>&1
+          godot --headless --verbose --path "$GITHUB_WORKSPACE" --export-debug "Android Debug" build/android/veil_circuit_debug.apk 2>&1
           if [ ! -f build/android/veil_circuit_debug.apk ]; then
             echo "ERROR: APK not created. Godot export failed."
             exit 1
