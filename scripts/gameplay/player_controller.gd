@@ -14,7 +14,7 @@ class_name Player
 @export_group("Camera")
 @export var camera_distance: float = 8.0
 @export var camera_height: float = 5.0
-@export var camera_angle: float = 45.0
+@export var camera_angle: float = 27.0
 @export var camera_smooth_speed: float = 10.0
 
 @export_group("Stance")
