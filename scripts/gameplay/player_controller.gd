@@ -72,6 +72,7 @@ func _setup_camera() -> void:
 	var angle_rad = deg_to_rad(camera_angle)
 	camera_pivot.rotation = Vector3(angle_rad, 0, 0)
 	camera_pivot.position = Vector3(0, camera_height, camera_distance)
+	camera.make_current()
 
 func _setup_input() -> void:
 	InputManager.register_custom_action("move_left", InputManager.ACTION_TYPE_AXIS, 0.15, [
