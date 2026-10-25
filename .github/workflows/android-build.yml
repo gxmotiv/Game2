@@ -169,7 +169,7 @@ jobs:
           export ANDROID_SDK_ROOT="$HOME/android-sdk"
           set -o pipefail
           godot --headless --verbose --path "$GITHUB_WORKSPACE" --export-debug "Android Debug" build/android/veil_circuit_debug.apk 2>&1 | tee /tmp/godot-export.log
-          if grep -E "SCRIPT ERROR:|Parse Error|Cannot get class|Parent path .* vanished|ERROR: Failed loading|Invalid assignment of property|_create_mesh_array|NULL MESH INSTANCE|Failed to retrieve non-existent singleton|valid InputEvent object|No loader found for resource" /tmp/godot-export.log; then
+          if grep -E "SCRIPT ERROR:|Parse Error|Cannot get class|Parent path .* vanished|ERROR: Failed loading|Invalid assignment of property|_create_mesh_array|NULL MESH INSTANCE|Failed to retrieve non-existent singleton|valid InputEvent object|No loader found for resource|SHADER ERROR|Shader compilation failed" /tmp/godot-export.log; then
             echo "ERROR: Godot export reported scene, resource, or script errors."
             exit 1
           fi
