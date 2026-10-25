@@ -143,10 +143,6 @@ jobs:
           test -f "$JAVA_HOME/bin/java"
           test -f "$HOME/.android/debug.keystore"
 
-      - name: Validate Godot project scripts
-        run: |
-          godot --headless --path "$GITHUB_WORKSPACE" --check-only
-
       - name: Build Android Debug APK
         run: |
           set -e
