@@ -207,14 +207,12 @@ func _check_interaction(delta: float) -> void:
 	_current_interactable = null
 
 func _try_interact_from_hud() -> void:
-	# Called by the on-screen Android INTERACT button.
+	# Called directly by the on-screen Android INTERACT button.
 	if _current_interactable and is_instance_valid(_current_interactable):
-		_try_interact(_current_interactable)
-	elif _nearby_interactables.size() > 0:
-		_try_interact(_nearby_interactables[0])
+		_try_interact(_current_interactable, true)
 
-func _try_interact(interactable: Node3D) -> void:
-	if InputManager.is_interacting():
+func _try_interact(interactable: Node3D, from_hud: bool = false) -> void:
+	if from_hud or InputManager.is_interacting():
 		if interactable.has_method("try_start_hack"):
 			var success = interactable.try_start_hack()
 			if success:
