@@ -127,10 +127,10 @@ jobs:
       - name: Build Android Debug APK
         run: |
           set -e
-          # Export with verbose output to capture configuration errors
+          # Export with debug-level logging to capture configuration errors
           export GODOT_ANDROID_SDK_PATH="$HOME/android-sdk"
           export GODOT_ANDROID_JDK_PATH="$JAVA_HOME"
-          godot --headless --verbose --export-release "Android Debug" build/android/veil_circuit_debug.apk --editor-settings $HOME/.config/godot/editor_settings-4.tres 2>&1
+          godot --headless --log-level=debug --export-release "Android Debug" build/android/veil_circuit_debug.apk --editor-settings $HOME/.config/godot/editor_settings-4.tres 2>&1
           # Verify APK was created and is non-empty
           if [ ! -f build/android/veil_circuit_debug.apk ]; then
             echo "ERROR: APK not created. Godot export failed."
