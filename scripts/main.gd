@@ -9,3 +9,8 @@ func _ready() -> void:
 	
 	if terminal and security_light:
 		terminal.linked_security_device = security_light
+	# Diagnostic guard: list invalid mesh instances while headless testing.
+	for node in find_children("*", "MeshInstance3D", true, false):
+		var mesh_node := node as MeshInstance3D
+		if mesh_node.mesh == null:
+			push_error("NULL MESH INSTANCE: %s" % mesh_node.get_path())
