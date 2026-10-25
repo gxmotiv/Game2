@@ -38,6 +38,8 @@ render_priority = 1
 [node name="Guard" type="CharacterBody3D" scene_instance_id=1]
 script = ExtResource("1")
 patrol_points = [Vector3(-6, 0, -6), Vector3(6, 0, -6), Vector3(6, 0, 2), Vector3(-6, 0, 2)]
+vision_cone_mesh = NodePath("VisionCone")
+state_indicator = NodePath("StateIndicator")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("2")
