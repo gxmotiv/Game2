@@ -38,6 +38,10 @@ emission_energy_multiplier = 2.0
 
 [node name="Terminal" type="StaticBody3D" scene_instance_id=1]
 script = ExtResource("1")
+screen_mesh = NodePath("Screen")
+status_light = NodePath("StatusLight")
+status_light_glow = NodePath("StatusLight/StatusLightGlow")
+prompt_label = NodePath("PromptLabel")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("2")
