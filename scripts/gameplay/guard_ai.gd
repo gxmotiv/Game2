@@ -61,7 +61,7 @@ var _stealth_system: Variant
 var _guard_id: int
 
 func _ready() -> void:
-	_stealth_system = Engine.get_singleton("StealthSystem")
+	_stealth_system = get_node_or_null("/root/StealthSystem")
 	
 	# Setup vision cone
 	if vision_cone_mesh:
