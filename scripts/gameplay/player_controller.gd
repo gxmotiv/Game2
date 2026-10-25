@@ -47,6 +47,7 @@ var _capsule_shape: CapsuleShape3D
 var _mesh_height: float = 1.8
 
 func _ready() -> void:
+	add_to_group("player")
 	camera_pivot = $CameraPivot
 	camera = $CameraPivot/Camera3D
 	collision_shape = $CollisionShape3D
@@ -204,6 +205,13 @@ func _check_interaction(delta: float) -> void:
 			return
 	
 	_current_interactable = null
+
+func _try_interact_from_hud() -> void:
+	# Called by the on-screen Android INTERACT button.
+	if _current_interactable and is_instance_valid(_current_interactable):
+		_try_interact(_current_interactable)
+	elif _nearby_interactables.size() > 0:
+		_try_interact(_nearby_interactables[0])
 
 func _try_interact(interactable: Node3D) -> void:
 	if InputManager.is_interacting():
