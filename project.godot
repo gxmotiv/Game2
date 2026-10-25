@@ -24,6 +24,7 @@ window/permit/allow_hidpi=true
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
 rendering/quality/shadows/enable=false
 rendering/quality/shadows/atlas_size=1024
 rendering/quality/shadows/directional_shadow_count=1
