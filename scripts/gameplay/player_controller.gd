@@ -70,7 +70,7 @@ func _setup_camera() -> void:
 	camera.far = 100.0
 	
 	var angle_rad = deg_to_rad(camera_angle)
-	camera_pivot.rotation = Vector3(angle_rad, 0, 0)
+	camera_pivot.rotation = Vector3(-angle_rad, 0, 0)
 	camera_pivot.position = Vector3(0, camera_height, camera_distance)
 	camera.make_current()
 
