@@ -77,6 +77,9 @@ var _terminal: Node
 var _solution_shown: bool = false
 
 func _ready() -> void:
+	# Keep the hacking overlay hidden until the player interacts with a terminal.
+	visible = false
+
 	# Get UI references
 	if not grid_container:
 		grid_container = get_node("PuzzleContainer/GridContainer")
@@ -213,7 +216,7 @@ func _process(delta: float) -> void:
 	if timer_label:
 		timer_label.text = "%ds" % int(ceil(_time_remaining))
 		if _time_remaining <= 10.0:
-			timer_label.custom_colors.font_color = Color(1.0, 0.3, 0.3, 1.0)
+			timer_label.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3, 1.0))
 	
 	if _time_remaining <= 0.0:
 		_fail_puzzle()
