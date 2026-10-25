@@ -70,7 +70,7 @@ func _setup_camera() -> void:
 	camera.far = 100.0
 	
 	var angle_rad = deg_to_rad(camera_angle)
-	camera_pivot.rotation = Vector3(-angle_rad, 0, 0)
+	camera_pivot.rotation = Vector3(angle_rad, 0, 0)
 	camera_pivot.position = Vector3(0, camera_height, camera_distance)
 
 func _setup_input() -> void:
@@ -170,7 +170,7 @@ func _handle_stance(delta: float) -> void:
 	mesh.scale = mesh_scale
 
 func _update_camera(delta: float) -> void:
-	_target_camera_pos = global_position + Vector3(0, camera_height, 0)
+	_target_camera_pos = global_position + Vector3(0, camera_height, camera_distance)
 	camera_pivot.global_position = camera_pivot.global_position.lerp(_target_camera_pos, camera_smooth_speed * delta)
 
 func _check_interaction(delta: float) -> void:
