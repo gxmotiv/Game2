@@ -110,15 +110,15 @@ jobs:
             echo "ERROR: JAVA_HOME not set or invalid"
             exit 1
           fi
-          printf '%s\n' \
-            '[gd_resource type="EditorSettings" load_steps=1 format=3]' \
-            '' \
-            '[resource]' \
-            'export/android/adb = ""' \
-            "export/android/jdk_path = \"$JAVA_HOME\"" \
-            "export/android/sdk_path = \"$HOME/android-sdk\"" \
-            'run/main_scene = "res://scenes/main/main.tscn"' \
-            > $HOME/.config/godot/editor_settings-4.tres
+          cat > $HOME/.config/godot/editor_settings-4.tres <<EOF
+[gd_resource type="EditorSettings" load_steps=1 format=3]
+
+[resource]
+export/android/adb = ""
+export/android/jdk_path = "$JAVA_HOME"
+export/android/sdk_path = "$HOME/android-sdk"
+run/main_scene = "res://scenes/main/main.tscn"
+EOF
 
       - name: Verify editor settings
         run: |
