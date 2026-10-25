@@ -8,7 +8,6 @@ class_name MainScene
 @onready var terminal = $Terminal
 @onready var mobile_hud = $MobileHUD
 @onready var hacking_puzzle = $HackingPuzzle
-@onready var systems = $Systems
 
 func _ready() -> void:
 	# Connect signals
@@ -21,10 +20,6 @@ func _ready() -> void:
 	
 	if hacking_puzzle:
 		hacking_puzzle.connect("puzzle_completed", _on_puzzle_completed)
-	
-	# Initialize systems
-	if Systems:
-		pass # Systems are autoloads
 
 func _on_player_died() -> void:
 	print("Player died!")

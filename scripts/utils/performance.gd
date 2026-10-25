@@ -38,9 +38,7 @@ static func get_min_max_frame_time() -> Dictionary:
 static func get_memory_usage() -> Dictionary:
 	return {
 		"static": OS.get_static_memory_usage(),
-		"dynamic": OS.get_dynamic_memory_usage(),
-		"static_peak": OS.get_static_memory_peak_usage(),
-		"dynamic_peak": OS.get_dynamic_memory_peak_usage()
+		"static_peak": OS.get_static_memory_peak_usage()
 	}
 
 static func print_performance_report() -> void:
@@ -53,7 +51,6 @@ static func print_performance_report() -> void:
 	print("Min Frame Time: %.4f ms" % [mm.min * 1000])
 	print("Max Frame Time: %.4f ms" % [mm.max * 1000])
 	print("Static Memory: %.2f MB" % [mem.static / 1024.0 / 1024.0])
-	print("Dynamic Memory: %.2f MB" % [mem.dynamic / 1024.0 / 1024.0])
 	print("==========================")
 
 static func reset() -> void:

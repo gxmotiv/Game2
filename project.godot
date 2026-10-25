@@ -69,6 +69,7 @@ InputManager = "*res://scripts/autoloads/input_map.gd"
 AudioManager = "*res://scripts/autoloads/audio_manager.gd"
 StealthSystem = "*res://scripts/core/stealth_system.gd"
 SaveManager = "*res://scripts/autoloads/save_manager.gd"
+InteractionSystem = "*res://scripts/core/interaction.gd"
 
 [debug]
 

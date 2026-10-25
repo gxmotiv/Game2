@@ -1,4 +1,5 @@
-class_name InteractionSystem
+extends Node
+class_name InteractionSystemClass
 
 signal interaction_available(interactable: Node3D)
 signal interaction_unavailable()
@@ -13,17 +14,17 @@ enum InteractionType {
 	CUSTOM = 4
 }
 
-static var _current_interactable: Node3D = null
-static var _interaction_range: float = 2.5
-static var _current_type: int = InteractionType.CUSTOM
+var _current_interactable: Node3D = null
+var _interaction_range: float = 2.5
+var _current_type: int = InteractionType.CUSTOM
 
-static func set_interaction_range(range: float) -> void:
+func set_interaction_range(range: float) -> void:
 	_interaction_range = range
 
-static func get_interaction_range() -> float:
+func get_interaction_range() -> float:
 	return _interaction_range
 
-static func set_current_interactable(interactable: Node3D, type: int = InteractionType.CUSTOM) -> void:
+func set_current_interactable(interactable: Node3D, type: int = InteractionType.CUSTOM) -> void:
 	_current_interactable = interactable
 	_current_type = type
 	if interactable:
@@ -31,29 +32,29 @@ static func set_current_interactable(interactable: Node3D, type: int = Interacti
 	else:
 		interaction_unavailable.emit()
 
-static func get_current_interactable() -> Node3D:
+func get_current_interactable() -> Node3D:
 	return _current_interactable
 
-static func get_current_type() -> int:
+func get_current_type() -> int:
 	return _current_type
 
-static func try_interact() -> bool:
+func try_interact() -> bool:
 	if _current_interactable and _current_interactable.is_inside_tree():
 		interaction_started.emit(_current_interactable)
 		return true
 	return false
 
-static func complete_interaction(success: bool) -> void:
+func complete_interaction(success: bool) -> void:
 	if _current_interactable:
 		interaction_completed.emit(_current_interactable, success)
 		_current_interactable = null
 		_current_type = InteractionType.CUSTOM
 		interaction_unavailable.emit()
 
-static func is_interacting() -> bool:
+func is_interacting() -> bool:
 	return _current_interactable != null
 
-static func get_interaction_prompt_text() -> String:
+func get_interaction_prompt_text() -> String:
 	if not _current_interactable:
 		return ""
 	
