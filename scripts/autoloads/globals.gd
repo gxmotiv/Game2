@@ -75,6 +75,18 @@ var camera_sensitivity: float = 1.0
 
 func _ready() -> void:
 	_load_settings()
+	call_deferred("_apply_volumes_deferred")
+
+func _apply_volumes_deferred() -> void:
+	var master_idx = AudioServer.get_bus_index("Master")
+	if master_idx >= 0:
+		AudioServer.set_bus_volume_db(master_idx, linear_to_db(master_volume))
+	var sfx_idx = AudioServer.get_bus_index("SFX")
+	if sfx_idx >= 0:
+		AudioServer.set_bus_volume_db(sfx_idx, linear_to_db(sfx_volume))
+	var music_idx = AudioServer.get_bus_index("Music")
+	if music_idx >= 0:
+		AudioServer.set_bus_volume_db(music_idx, linear_to_db(music_volume))
 
 func _load_settings() -> void:
 	var config = ConfigFile.new()
@@ -87,9 +99,6 @@ func _load_settings() -> void:
 		vibration_enabled = config.get_value("input", "vibration_enabled", true)
 		inverted_camera_y = config.get_value("input", "inverted_camera_y", false)
 		camera_sensitivity = config.get_value("input", "camera_sensitivity", 1.0)
-	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Master"), linear_to_db(master_volume))
-	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("SFX"), linear_to_db(sfx_volume))
-	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Music"), linear_to_db(music_volume))
 
 func _save_settings() -> void:
 	var config = ConfigFile.new()
@@ -104,20 +113,27 @@ func _save_settings() -> void:
 
 func set_master_volume(volume: float) -> void:
 	master_volume = clamp(volume, 0.0, 1.0)
-	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Master"), linear_to_db(master_volume))
+	var idx = AudioServer.get_bus_index("Master")
+	if idx >= 0:
+		AudioServer.set_bus_volume_db(idx, linear_to_db(master_volume))
 	_save_settings()
 	settings_changed.emit()
 
 func set_sfx_volume(volume: float) -> void:
 	sfx_volume = clamp(volume, 0.0, 1.0)
-	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("SFX"), linear_to_db(sfx_volume))
+	var idx = AudioServer.get_bus_index("SFX")
+	if idx >= 0:
+		AudioServer.set_bus_volume_db(idx, linear_to_db(sfx_volume))
 	_save_settings()
 	settings_changed.emit()
 
 func set_music_volume(volume: float) -> void:
 	music_volume = clamp(volume, 0.0, 1.0)
-	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Music"), linear_to_db(music_volume))
+	var idx = AudioServer.get_bus_index("Music")
+	if idx >= 0:
+		AudioServer.set_bus_volume_db(idx, linear_to_db(music_volume))
 	_save_settings()
+	settings_changed.emit()
 	settings_changed.emit()
 
 func set_difficulty(difficulty: int) -> void:

@@ -275,6 +275,31 @@ func is_hack_confirm() -> bool:
 func is_hack_cancel() -> bool:
 	return Input.is_action_just_pressed("hack_cancel")
 
+# Virtual action state for touch controls
+var _virtual_actions: Dictionary = {
+	"touch_move_vector": Vector2.ZERO,
+	"touch_sprint": false,
+	"touch_crouch": false
+}
+
+func set_touch_move_vector(vector: Vector2) -> void:
+	_virtual_actions["touch_move_vector"] = vector
+
+func set_touch_sprint(pressed: bool) -> void:
+	_virtual_actions["touch_sprint"] = pressed
+
+func set_touch_crouch(pressed: bool) -> void:
+	_virtual_actions["touch_crouch"] = pressed
+
+func get_touch_move_vector() -> Vector2:
+	return _virtual_actions["touch_move_vector"]
+
+func is_touch_sprinting() -> bool:
+	return _virtual_actions["touch_sprint"]
+
+func is_touch_crouching() -> bool:
+	return _virtual_actions["touch_crouch"]
+
 func register_custom_action(action_name: String, action_type: int = ACTION_TYPE_BUTTON, deadzone: float = 0.5, events: Array = []) -> void:
 	if InputMap.has_action(action_name):
 		InputMap.erase_action(action_name)

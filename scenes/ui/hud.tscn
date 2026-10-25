@@ -1,0 +1,141 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="2"]
+bg_color = Color(0.05, 0.05, 0.1, 0.8)
+border_color = Color(0.2, 0.6, 1.0, 0.5)
+border_width_bottom = 2
+border_width_left = 2
+border_width_right = 2
+border_width_top = 2
+corner_radius_bottom_left = 8
+corner_radius_bottom_right = 8
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+
+[sub_resource type="StyleBoxFlat" id="3"]
+bg_color = Color(0.1, 0.1, 0.15, 0.9)
+border_color = Color(0.3, 0.7, 1.0, 0.6)
+border_width_bottom = 2
+border_width_left = 2
+border_width_right = 2
+border_width_top = 2
+corner_radius_bottom_left = 6
+corner_radius_bottom_right = 6
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+
+[sub_resource type="StyleBoxFlat" id="4"]
+bg_color = Color(0.15, 0.15, 0.2, 0.9)
+border_color = Color(0.2, 0.6, 1.0, 0.5)
+border_width_bottom = 2
+border_width_left = 2
+border_width_right = 2
+border_width_top = 2
+corner_radius_bottom_left = 8
+corner_radius_bottom_right = 8
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+
+[sub_resource type="StyleBoxFlat" id="5"]
+bg_color = Color(0.1, 0.3, 0.2, 0.9)
+border_color = Color(0.2, 0.8, 0.4, 0.8)
+border_width_bottom = 2
+border_width_left = 2
+border_width_right = 2
+border_width_top = 2
+corner_radius_bottom_left = 6
+corner_radius_bottom_right = 6
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+
+[node name="HUD" type="CanvasLayer" scene_instance_id=1]
+layer = 10
+
+[node name="SuspicionContainer" type="HBoxContainer" parent="."]
+anchors_preset = 9
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 300.0
+offset_bottom = 60.0
+theme_override_constants/separation = 10
+custom_styles/panel = SubResource("2")
+
+[node name="SuspicionLabel" type="Label" parent="SuspicionContainer"]
+text = "Suspicion: 0%"
+theme_override_font_sizes/font_size = 16
+custom_colors/font_color = Color(0.2, 1.0, 0.4, 1.0)
+custom_colors/font_outline_color = Color(0, 0, 0, 1)
+custom_colors/font_outline_size = 1
+mouse_filter = 0
+
+[node name="SuspicionBar" type="ProgressBar" parent="SuspicionContainer"]
+min_value = 0.0
+max_value = 100.0
+value = 0.0
+custom_styles/panel = SubResource("3")
+custom_styles/progress = SubResource("5")
+size_flags_horizontal = 3
+
+[node name="InteractionPrompt" type="Label" parent="."]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -150.0
+offset_top = -80.0
+offset_right = 150.0
+offset_bottom = -20.0
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 18
+custom_colors/font_color = Color(0.2, 1.0, 0.4, 1.0)
+custom_colors/font_outline_color = Color(0, 0, 0, 1)
+custom_colors/font_outline_size = 2
+visible = false
+mouse_filter = 0
+
+[node name="MinimapContainer" type="PanelContainer" parent="."]
+anchors_preset = 10
+anchor_left = 1.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_left = -220.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -180.0
+custom_styles/panel = SubResource("2")
+
+[node name="Minimap" type="TextureRect" parent="MinimapContainer"]
+stretch_mode = 1
+custom_styles/panel = SubResource("4")
+mouse_filter = 0
+
+[node name="MobileControls" type="HBoxContainer" parent="."]
+anchors_preset = 12
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -150.0
+offset_top = -80.0
+offset_right = 150.0
+offset_bottom = -20.0
+alignment = 1
+theme_override_constants/separation = 20
+
+[node name="InteractButton" type="Button" parent="MobileControls"]
+text = "INTERACT"
+theme_override_font_sizes/font_size = 14
+custom_styles/normal = SubResource("4")
+custom_colors/font_color = Color(1, 1, 1, 1)
+custom_colors/font_outline_color = Color(0, 0, 0, 1)
+visible = false
+mouse_filter = 0

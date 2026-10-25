@@ -1,0 +1,19 @@
+[gd_scene load_steps=2 format=3]
+
+[sub_resource type="CylinderMesh" id="1"]
+height = 0.3
+radius = 0.25
+
+[sub_resource type="StandardMaterial3D" id="2"]
+albedo_color = Color(0.2, 1.0, 0.2, 1.0)
+emission_enabled = true
+emission_energy_multiplier = 0.5
+emission_color = Color(0.2, 1.0, 0.2, 1.0)
+transparency = 1
+render_priority = 1
+
+[node name="StateIndicator" type="MeshInstance3D" scene_instance_id=1]
+mesh = SubResource("1")
+material_override = SubResource("2")
+position = Vector3(0, 2.2, 0)
+visible = true
