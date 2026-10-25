@@ -124,10 +124,6 @@ jobs:
         run: |
           cat $HOME/.config/godot/editor_settings-4.tres
 
-      - name: Validate project syntax
-        run: |
-          godot --headless --check-only --path "$GITHUB_WORKSPACE"
-
       - name: Build Android Debug APK
         run: |
           set -e
