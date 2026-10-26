@@ -214,6 +214,29 @@ func _run_gameplay_smoke_test() -> void:
 		return
 	print("GAMEPLAY CHECK OK: INTERACT opens the hacking puzzle.")
 
+	# Exercise the actual TextureButton pressed signal used by touch input.
+	# Put a harmless test pipe off the guaranteed route so this cannot finish the puzzle.
+	var test_index: int = 0
+	var puzzle_nodes: Array = puzzle.get("_nodes")
+	var puzzle_rotations: Array = puzzle.get("_node_rotations")
+	puzzle_nodes[test_index] = 1 # STRAIGHT
+	puzzle_rotations[test_index] = 0
+	puzzle.call("_update_button_visual", test_index)
+	var puzzle_grid: GridContainer = puzzle.get_node("PuzzleContainer/GridContainer") as GridContainer
+	var test_button: TextureButton = puzzle_grid.get_child(test_index) as TextureButton
+	var rotation_before: int = int(puzzle_rotations[test_index])
+	var texture_cache_before: int = (puzzle.get("_texture_cache") as Dictionary).size()
+	test_button.emit_signal("pressed")
+	if int(puzzle_rotations[test_index]) != (rotation_before + 1) % 4:
+		_fail("Puzzle tile pressed signal did not rotate the pipe immediately.")
+		return
+	for tap_index in range(4):
+		test_button.emit_signal("pressed")
+	if (puzzle.get("_texture_cache") as Dictionary).size() != texture_cache_before:
+		_fail("Puzzle tap regenerated textures instead of reusing the cache.")
+		return
+	print("GAMEPLAY CHECK OK: puzzle button taps rotate immediately and reuse cached textures.")
+
 	# Solve the generated straight route to validate end-to-end hacking.
 	var grid_size: int = int(puzzle.get("grid_size"))
 	var start_grid_position: Vector2i = puzzle.get("_start_pos")
