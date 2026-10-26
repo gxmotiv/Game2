@@ -20,7 +20,7 @@ func _run_gameplay_smoke_test() -> void:
 
 	var player: CharacterBody3D = game.get_node_or_null("Player") as CharacterBody3D
 	var terminal: Node3D = game.get_node_or_null("Terminal") as Node3D
-	var puzzle: Node = game.get_node_or_null("HackingPuzzle")
+	var puzzle: CanvasLayer = game.get_node_or_null("HackingPuzzle") as CanvasLayer
 	var input_manager: Node = root.get_node_or_null("InputManager")
 	if player == null or terminal == null or puzzle == null or input_manager == null:
 		_fail("Main scene is missing Player, Terminal, HackingPuzzle, or InputManager.")
@@ -60,7 +60,8 @@ func _run_gameplay_smoke_test() -> void:
 	# The puzzle generator guarantees a horizontal route across the middle row.
 	# Rotate each of its straight pipe tiles until it connects left-to-right.
 	var grid_size: int = int(puzzle.get("grid_size"))
-	var route_row: int = int((puzzle.get("_start_pos") as Vector2i).y)
+	var start_grid_position: Vector2i = puzzle.get("_start_pos")
+	var route_row: int = start_grid_position.y
 	var rotations: Array = puzzle.get("_node_rotations")
 	for column in range(1, grid_size - 1):
 		var node_index: int = route_row * grid_size + column
