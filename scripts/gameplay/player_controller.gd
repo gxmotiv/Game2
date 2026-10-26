@@ -12,7 +12,7 @@ class_name Player
 @export_group("Camera")
 @export var camera_distance: float = 7.0
 @export var camera_height: float = 3.4
-@export var camera_angle: float = 12.0
+@export var camera_angle: float = 15.0
 @export var camera_smooth_speed: float = 12.0
 @export var look_sensitivity: float = 0.004
 
@@ -145,41 +145,60 @@ func _update_camera(delta: float) -> void:
 	camera_pivot.global_position = camera_pivot.global_position.lerp(target_position, min(camera_smooth_speed * delta, 1.0))
 
 func _check_interaction(delta: float) -> void:
+	# Keyboard interaction is checked every physics frame, not only on the
+	# slower range-scan interval, so short key taps are not lost.
+	if InputManager.is_interacting() and is_instance_valid(_current_interactable):
+		_try_interact(_current_interactable, true)
+
 	_interaction_timer += delta
 	if _interaction_timer < interaction_check_interval or _in_puzzle:
 		return
 	_interaction_timer = 0.0
 
-	var previous_interactable := _current_interactable
-	var ray_origin: Vector3 = global_position + Vector3(0.0, 1.35, 0.0)
-	var ray_direction: Vector3 = -camera.global_transform.basis.z
-	var query := PhysicsRayQueryParameters3D.create(
-		ray_origin,
-		ray_origin + ray_direction * interaction_range
-	)
-	# PhysicsRayQueryParameters3D.exclude requires RIDs, not instance IDs.
-	query.exclude = [get_rid()]
-	query.collision_mask = 1
-	var result := get_world_3d().direct_space_state.intersect_ray(query)
+	# Find the nearest terminal in its trigger area. Mobile players should not
+	# need pixel-perfect camera aiming to press INTERACT.
+	var previous_interactable: Node3D = _current_interactable
+	var nearest: Node3D = null
+	var nearest_distance_sq: float = interaction_range * interaction_range
+	var ray_origin: Vector3 = global_position + Vector3(0.0, 1.25, 0.0)
 
-	var hit_node: Node3D = null
-	if not result.is_empty():
-		var collider = result.get("collider")
-		if collider is Node3D and collider.is_in_group("hackable"):
-			hit_node = collider
+	for candidate in get_tree().get_nodes_in_group("hackable"):
+		if not candidate is Node3D:
+			continue
+		var interactable: Node3D = candidate as Node3D
+		if not interactable.has_method("get_player_in_range"):
+			continue
+		if not bool(interactable.call("get_player_in_range")):
+			continue
 
-	_current_interactable = hit_node
+		var distance_sq: float = global_position.distance_squared_to(interactable.global_position)
+		if distance_sq > nearest_distance_sq:
+			continue
+
+		# Preserve stealth/geometry rules: don't allow hacking through a wall.
+		var ray_target: Vector3 = interactable.global_position + Vector3(0.0, 0.6, 0.0)
+		var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(ray_origin, ray_target)
+		query.exclude = [get_rid()]
+		query.collision_mask = 1
+		var hit: Dictionary = get_world_3d().direct_space_state.intersect_ray(query)
+		if hit.is_empty() or hit.get("collider") != interactable:
+			continue
+
+		nearest = interactable
+		nearest_distance_sq = distance_sq
+
+	_current_interactable = nearest
 	if _current_interactable != previous_interactable:
-		if _current_interactable:
+		if is_instance_valid(_current_interactable):
 			interaction_available.emit(_current_interactable)
 		else:
 			interaction_unavailable.emit()
 
-	var objective_label := get_tree().root.find_child("ObjectiveLabel", true, false)
+	var objective_label: Node = get_tree().root.find_child("ObjectiveLabel", true, false)
 	if objective_label:
-		if _current_interactable and _current_interactable.has_method("get_player_in_range") and _current_interactable.get_player_in_range():
+		if is_instance_valid(_current_interactable):
 			objective_label.text = "TERMINAL IN RANGE  •  TAP INTERACT"
-		elif not _in_puzzle:
+		else:
 			objective_label.text = "OBJECTIVE: REACH THE TERMINAL  •  DRAG RIGHT SIDE TO LOOK"
 
 func _try_interact_from_hud() -> void:
