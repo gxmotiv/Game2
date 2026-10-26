@@ -1,9 +1,9 @@
 extends CanvasLayer
 class_name MinigameUI
 
-@onready var timer_label = $TimerLabel
-@onready var hint_button = $ButtonContainer/HintButton
-@onready var exit_button = $ButtonContainer/ExitButton
+@onready var timer_label = $PuzzleContainer/TitleBar/TimerLabel
+@onready var hint_button = $PuzzleContainer/ButtonBar/HintButton
+@onready var exit_button = $PuzzleContainer/ButtonBar/ExitButton
 
 signal hint_requested()
 signal exit_requested()
