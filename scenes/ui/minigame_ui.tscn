@@ -76,6 +76,8 @@ corner_radius_top_right = 8
 
 [node name="MinigameUI" type="CanvasLayer" scene_instance_id=1]
 script = ExtResource("1")
+visible = false
+script = ExtResource("1")
 layer = 20
 
 [node name="PuzzleContainer" type="Control" parent="."]
