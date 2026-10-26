@@ -147,7 +147,7 @@ func _create_building(node_name: String, center: Vector3, size: Vector3, buildin
 	var sign_width := minf(3.6, size.x * 0.48)
 	var sign_mesh := BoxMesh.new()
 	sign_mesh.size = Vector3(sign_width, 0.28, 0.10)
-	var sign_color := Color(0.08, 0.9, 0.75) if landmark else _rng.get_color()
+	var sign_color := Color(0.08, 0.9, 0.75) if landmark else Color(_rng.randf_range(0.2, 1.0), _rng.randf_range(0.2, 1.0), _rng.randf_range(0.2, 1.0))
 	var sign_material := _make_material(sign_color, sign_color, 0.55)
 	var sign := MeshInstance3D.new()
 	sign.name = "NeonFacadeSign"
