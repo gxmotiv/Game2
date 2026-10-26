@@ -68,6 +68,8 @@ const CONNECTIONS = {
 var _nodes: Array = []
 var _node_buttons: Array = []
 var _node_rotations: Array = []
+# Pre-rendered node textures prevent pixel-by-pixel GDScript work on every tap.
+var _texture_cache: Dictionary = {}
 var _start_pos: Vector2i = Vector2i(0, 0)
 var _end_pos: Vector2i = Vector2i(3, 3)
 var _time_remaining: float = 0.0
@@ -90,6 +92,13 @@ func _ready() -> void:
 	if not exit_button:
 		exit_button = get_node("PuzzleContainer/ButtonBar/ExitButton")
 	
+	# Build only the texture combinations used by the puzzle. This moves texture
+	# generation out of the tap handler and removes the visible click delay.
+	for node_type in range(NodeType.EMPTY, NodeType.END + 1):
+		var rotation_count: int = 4 if node_type in [NodeType.STRAIGHT, NodeType.CORNER, NodeType.T_JUNCTION, NodeType.CROSS] else 1
+		for rotation_value in range(rotation_count):
+			_texture_cache[_texture_cache_key(node_type, rotation_value)] = _create_node_texture(node_type, rotation_value)
+
 	# Connect signals
 	for i in range(grid_container.get_child_count()):
 		var btn = grid_container.get_child(i)
@@ -226,6 +235,9 @@ func _rotate_node(index: int) -> void:
 	_update_button_visual(index)
 	_check_puzzle_solved()
 
+func _texture_cache_key(node_type: int, rotation_value: int) -> int:
+	return node_type * 4 + posmod(rotation_value, 4)
+
 func _update_button_visual(index: int) -> void:
 	if index >= _node_buttons.size():
 		return
@@ -237,9 +249,12 @@ func _update_button_visual(index: int) -> void:
 	if not btn:
 		return
 	
-	# Create texture based on node type and rotation
-	var texture = _create_node_texture(node_type, rotation)
-	btn.texture_normal = texture
+	# EMPTY/START/END visuals do not depend on rotation; all pipe variants are cached.
+	var visual_rotation: int = rotation if node_type in [NodeType.STRAIGHT, NodeType.CORNER, NodeType.T_JUNCTION, NodeType.CROSS] else 0
+	var cache_key: int = _texture_cache_key(node_type, visual_rotation)
+	if not _texture_cache.has(cache_key):
+		_texture_cache[cache_key] = _create_node_texture(node_type, visual_rotation)
+	btn.texture_normal = _texture_cache[cache_key] as Texture2D
 
 func _create_node_texture(node_type: int, rotation: int) -> ImageTexture:
 	var size = 64
@@ -368,7 +383,7 @@ func _solve_puzzle() -> void:
 	
 	# Delay before closing
 	var tween = create_tween()
-	tween.tween_callback(_on_puzzle_success).set_delay(1.5)
+	tween.tween_callback(_on_puzzle_success).set_delay(0.35)
 
 func _on_puzzle_success() -> void:
 	puzzle_completed.emit(true)
