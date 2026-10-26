@@ -2,9 +2,8 @@ name: Build Android Debug APK
 
 on:
   push:
-    branches: [kilo/airy-chime-uvv, fix/veil-circuit-runtime, feat/city-district-hacking]
+    branches: [kilo/airy-chime-uvv, fix/veil-circuit-runtime, feat/city-district-hacking, feat/veil-circuit-character-visuals]
   pull_request:
-    branches: [main]
   workflow_dispatch:
 
 permissions:

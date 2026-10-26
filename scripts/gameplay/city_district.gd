@@ -58,12 +58,19 @@ func _build_city_geometry() -> void:
 			marking_instances.append({"position": Vector3(offset, 0.03, along), "size": Vector3(0.12, 0.012, 2.2)})
 	_add_multimesh_boxes("RoadMarkings", marking_instances, marking_material, false)
 
-	# 32 varied buildings with collision bodies; all visible buildings share one draw call.
+	# Batch building silhouettes, facade glass and roof units; no per-window nodes.
 	var building_instances: Array[Dictionary] = []
+	var dark_window_instances: Array[Dictionary] = []
+	var lit_window_instances: Array[Dictionary] = []
+	var rooftop_vent_instances: Array[Dictionary] = []
 	var building_palette: Array[Color] = [
 		Color(0.22, 0.28, 0.34), Color(0.30, 0.32, 0.35),
 		Color(0.25, 0.29, 0.30), Color(0.34, 0.28, 0.25),
 		Color(0.19, 0.25, 0.31)
+	]
+	var dark_glass_palette: Array[Color] = [
+		Color(0.035, 0.085, 0.12), Color(0.05, 0.12, 0.16),
+		Color(0.07, 0.14, 0.18), Color(0.045, 0.10, 0.15)
 	]
 	for block_x in range(-STREET_HALF_COUNT, STREET_HALF_COUNT):
 		for block_z in range(-STREET_HALF_COUNT, STREET_HALF_COUNT):
@@ -78,7 +85,58 @@ func _build_city_geometry() -> void:
 				building_instances.append({"position": position, "size": footprint, "color": tint})
 				_add_building_collision("BuildingCollision_%02d" % _building_collision_count, position, footprint)
 				_building_collision_count += 1
+
+				# Floor-by-floor windows: 10 facades per floor, all instances batched.
+				var half_width: float = footprint.x * 0.5
+				var half_depth: float = footprint.z * 0.5
+				var floor_offset: float = 1.2
+				while floor_offset < height - 0.75:
+					for face_sign in [-1.0, 1.0]:
+						for column in range(3):
+							var x_offset: float = float(column - 1) * 1.45
+							var front_window_pos := Vector3(
+								position.x + x_offset,
+								0.08 + floor_offset,
+							position.z + float(face_sign) * (half_depth + 0.012)
+							)
+							_append_window(front_window_pos, Vector3(0.62, 0.64, 0.045), dark_glass_palette, dark_window_instances, lit_window_instances)
+						for column in range(2):
+							var z_offset: float = (float(column) - 0.5) * 2.4
+							var side_window_pos := Vector3(
+								position.x + float(face_sign) * (half_width + 0.012),
+								0.08 + floor_offset,
+							position.z + z_offset
+							)
+							_append_window(side_window_pos, Vector3(0.045, 0.64, 0.58), dark_glass_palette, dark_window_instances, lit_window_instances)
+					floor_offset += 2.0
+
+				# Compact rooftop HVAC boxes sit just above each building's roof.
+				var vent_size := Vector3(_rng.randf_range(0.85, 1.25), 0.34, _rng.randf_range(0.65, 0.95))
+				var vent_position := Vector3(
+					position.x + _rng.randf_range(-0.55, 0.55),
+					height + 0.25,
+					position.z + _rng.randf_range(-0.55, 0.55)
+				)
+				rooftop_vent_instances.append({"position": vent_position, "size": vent_size})
 	_add_multimesh_boxes("CityBuildings", building_instances, building_material, true)
+
+	# Three additional draw calls give the whole district windows and roof props.
+	var dark_window_material := _material(Color.WHITE)
+	dark_window_material.vertex_color_use_as_albedo = true
+	dark_window_material.metallic = 0.18
+	dark_window_material.roughness = 0.36
+	_add_multimesh_boxes("CityWindows", dark_window_instances, dark_window_material, true)
+
+	var lit_window_material := _material(Color(0.05, 0.24, 0.34), true)
+	lit_window_material.vertex_color_use_as_albedo = true
+	lit_window_material.emission = Color(0.025, 0.19, 0.30)
+	lit_window_material.emission_energy_multiplier = 0.55
+	_add_multimesh_boxes("CityLitWindows", lit_window_instances, lit_window_material, true)
+
+	var rooftop_vent_material := _material(Color(0.09, 0.12, 0.15))
+	rooftop_vent_material.metallic = 0.42
+	rooftop_vent_material.roughness = 0.58
+	_add_multimesh_boxes("RooftopHVAC", rooftop_vent_instances, rooftop_vent_material, false)
 
 	# Low-cost street lamps at the central junction make the district readable at a glance.
 	var pole_material := _material(Color(0.13, 0.16, 0.19))
@@ -102,6 +160,18 @@ func _build_city_geometry() -> void:
 	sun.light_energy = 0.8
 	sun.shadow_enabled = false
 	add_child(sun)
+
+func _append_window(position: Vector3, size: Vector3, glass_palette: Array[Color], dark_instances: Array[Dictionary], lit_instances: Array[Dictionary]) -> void:
+	if _rng.randf() < 0.15:
+		var glow_tint := Color(
+			_rng.randf_range(0.55, 1.0),
+			_rng.randf_range(0.72, 1.0),
+			1.0
+		)
+		lit_instances.append({"position": position, "size": size, "color": glow_tint})
+	else:
+		var tint: Color = glass_palette[_rng.randi_range(0, glass_palette.size() - 1)]
+		dark_instances.append({"position": position, "size": size, "color": tint})
 
 func _build_security_network() -> void:
 	_security_devices["SecurityLight"] = _create_security_light("SecurityLight", Vector3(6.0, 3.0, -8.0))
