@@ -294,6 +294,14 @@ func _process_hearing() -> void:
 					if guard.state < 2:
 						guard.investigation_target = event.position
 
+func set_guard_suspicion(guard_id: int, suspicion: float) -> void:
+	if not _guard_data.has(guard_id):
+		return
+	var safe_value := clamp(suspicion, 0.0, 100.0)
+	_guard_data[guard_id]["suspicion"] = safe_value
+	_guard_data[guard_id]["decay_timer"] = suspicion_decay_delay
+	suspicion_changed.emit(guard_id, safe_value)
+
 func get_guard_suspicion(guard_id: int) -> float:
 	if _guard_data.has(guard_id):
 		return _guard_data[guard_id].suspicion
