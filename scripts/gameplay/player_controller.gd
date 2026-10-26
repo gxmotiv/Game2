@@ -104,9 +104,12 @@ func _handle_movement(delta: float) -> void:
 		current_speed = crouch_speed
 
 	var target_speed: Vector2 = final_input * current_speed
-	var blend: float = acceleration if is_on_floor() else air_acceleration
-	_target_velocity.x = move_toward(_target_velocity.x, target_speed.x, blend * delta * max(current_speed, 1.0))
-	_target_velocity.z = move_toward(_target_velocity.z, target_speed.y, blend * delta * max(current_speed, 1.0))
+	var has_input: bool = final_input.length_squared() > 0.001
+	var rate: float = acceleration if has_input else deceleration
+	if not is_on_floor():
+		rate = air_acceleration if has_input else air_deceleration
+	_target_velocity.x = move_toward(_target_velocity.x, target_speed.x, rate * delta)
+	_target_velocity.z = move_toward(_target_velocity.z, target_speed.y, rate * delta)
 
 	if is_on_floor():
 		if _target_velocity.y < 0.0:
