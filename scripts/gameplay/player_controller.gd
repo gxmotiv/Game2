@@ -11,6 +11,7 @@ class_name Player
 
 @export_group("Camera")
 @export var camera_distance: float = 7.0
+@export var camera_shoulder_offset: float = 1.0
 @export var camera_height: float = 3.4
 @export var camera_angle: float = 15.0
 @export var camera_smooth_speed: float = 12.0
@@ -140,8 +141,10 @@ func _handle_stance(delta: float) -> void:
 	mesh.position.y = target_height * 0.5
 
 func _update_camera(delta: float) -> void:
-	var behind_player := Vector3(0.0, 0.0, camera_distance).rotated(Vector3.UP, camera_pivot.global_rotation.y)
-	var target_position := global_position + Vector3(0.0, camera_height, 0.0) + behind_player
+	var yaw: float = camera_pivot.global_rotation.y
+	var behind_player: Vector3 = Vector3(0.0, 0.0, camera_distance).rotated(Vector3.UP, yaw)
+	var shoulder_offset: Vector3 = Vector3(camera_shoulder_offset, 0.0, 0.0).rotated(Vector3.UP, yaw)
+	var target_position: Vector3 = global_position + Vector3(0.0, camera_height, 0.0) + behind_player + shoulder_offset
 	camera_pivot.global_position = camera_pivot.global_position.lerp(target_position, min(camera_smooth_speed * delta, 1.0))
 
 func _check_interaction(delta: float) -> void:
