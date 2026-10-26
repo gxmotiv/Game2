@@ -139,57 +139,45 @@ func _generate_puzzle() -> void:
 		_nodes[i] = _generate_random_node()
 		_node_rotations[i] = randi() % 4
 	
-	# Ensure start and end positions
-	_start_pos = Vector2i(0, randi() % grid_size)
-	_end_pos = Vector2i(grid_size - 1, randi() % grid_size)
-	
-	# Make sure start and end are different
-	if _start_pos == _end_pos:
-		_end_pos.y = (_end_pos.y + 1) % grid_size
-	
-	# Set start and end nodes
-	var start_idx = _start_pos.y * grid_size + _start_pos.x
-	var end_idx = _end_pos.y * grid_size + _end_pos.x
+	# Use a horizontal source-to-destination route. A straight route is
+	# easier to play on a small phone screen and guarantees the puzzle is solvable.
+	var route_row := int(grid_size / 2)
+	_start_pos = Vector2i(0, route_row)
+	_end_pos = Vector2i(grid_size - 1, route_row)
+
+	var start_idx := _start_pos.y * grid_size + _start_pos.x
+	var end_idx := _end_pos.y * grid_size + _end_pos.x
 	_nodes[start_idx] = NodeType.START
 	_nodes[end_idx] = NodeType.END
 	_node_rotations[start_idx] = 0
 	_node_rotations[end_idx] = 0
-	
-	# Ensure there's at least one valid path by creating a simple path
+
 	_create_guaranteed_path()
 
 func _create_guaranteed_path() -> void:
-	# Create a simple L-shaped path from start to end
-	var current = _start_pos
-	var target = _end_pos
-	
-	# Move horizontally first
-	while current.x != target.x:
-		var idx = current.y * grid_size + current.x
-		if _nodes[idx] != NodeType.START and _nodes[idx] != NodeType.END:
+	# Every middle tile on the route starts vertical. Rotating it once connects
+	# left-to-right; distractor pipes sit on the other rows.
+	var route_row := _start_pos.y
+	for x in range(grid_size):
+		var idx := route_row * grid_size + x
+		if x == 0:
+			_nodes[idx] = NodeType.START
+			_node_rotations[idx] = 0
+		elif x == grid_size - 1:
+			_nodes[idx] = NodeType.END
+			_node_rotations[idx] = 0
+		else:
 			_nodes[idx] = NodeType.STRAIGHT
-			if current.x < target.x:
-				_node_rotations[idx] = 1  # Right
-			else:
-				_node_rotations[idx] = 3  # Left
-		current.x += 1 if current.x < target.x else -1
-	
-	# Then vertically
-	while current.y != target.y:
-		var idx = current.y * grid_size + current.x
-		if _nodes[idx] != NodeType.START and _nodes[idx] != NodeType.END:
-			_nodes[idx] = NodeType.STRAIGHT
-			if current.y < target.y:
-				_node_rotations[idx] = 2  # Down
-			else:
-				_node_rotations[idx] = 0  # Up
-		current.y += 1 if current.y < target.y else -1
-	
-	# Add some random branches
-	for i in range(_nodes.size()):
-		if randf() < 0.3 and _nodes[i] not in [NodeType.START, NodeType.END]:
-			_nodes[i] = _get_random_pipe_type()
-			_node_rotations[i] = randi() % 4
+			_node_rotations[idx] = (randi() % 2) * 2
+
+	for y in range(grid_size):
+		if y == route_row:
+			continue
+		for x in range(grid_size):
+			var idx := y * grid_size + x
+			if randf() < 0.35:
+				_nodes[idx] = _get_random_pipe_type()
+				_node_rotations[idx] = randi() % 4
 
 func _get_random_pipe_type() -> int:
 	var types = [NodeType.STRAIGHT, NodeType.CORNER, NodeType.T_JUNCTION, NodeType.CROSS]
@@ -416,31 +404,14 @@ func _show_hint() -> void:
 				return
 
 func _is_on_solution_path(index: int) -> bool:
-	# Simple check: if this node connects toward start or end
-	var pos = Vector2i(index % grid_size, index / grid_size)
-	var connections = _get_rotated_connections(_nodes[index], _node_rotations[index])
-	return connections.size() > 0
+	var pos := Vector2i(index % grid_size, int(index / grid_size))
+	return pos.y == _start_pos.y and pos.x > 0 and pos.x < grid_size - 1
 
 func _get_correct_rotation(index: int) -> int:
-	# Simplified: just return a rotation that connects to a neighbor
-	var pos = Vector2i(index % grid_size, index / grid_size)
-	var node_type = _nodes[index]
-	var base_connections = CONNECTIONS[node_type] if CONNECTIONS.has(node_type) else []
-	
-	for rot in range(4):
-		var conns = _get_rotated_connections(node_type, rot)
-		for dir in conns:
-			var vec = DIR_VECTORS[dir]
-			var next = pos + vec
-			if next.x >= 0 and next.x < grid_size and next.y >= 0 and next.y < grid_size:
-				var next_idx = next.y * grid_size + next.x
-				var next_type = _nodes[next_idx]
-				if next_type != NodeType.EMPTY:
-					var next_conns = _get_rotated_connections(next_type, _node_rotations[next_idx])
-					var opposite = (dir + 2) % 4
-					if opposite in next_conns:
-						return rot
-	return 0
+	var pos := Vector2i(index % grid_size, int(index / grid_size))
+	if pos.y == _start_pos.y and pos.x > 0 and pos.x < grid_size - 1:
+		return 1 # Straight pipe connects left and right at rotation 1.
+	return _node_rotations[index]
 
 func _highlight_solution() -> void:
 	# Flash all connected nodes green
@@ -459,8 +430,8 @@ func _highlight_solution() -> void:
 			var btn = _node_buttons[idx]
 			if btn:
 				var tween = btn.create_tween()
-				tween.tween_property(btn, "modulate:self_modulate", color_connected, 0.2)
-				tween.tween_property(btn, "modulate:self_modulate", Color(1,1,1,1), 0.3)
+				tween.tween_property(btn, "self_modulate", color_connected, 0.2)
+				tween.tween_property(btn, "self_modulate", Color(1, 1, 1, 1), 0.3)
 		
 		var connections = _get_rotated_connections(node_type, _node_rotations[idx])
 		
