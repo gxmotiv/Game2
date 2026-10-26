@@ -45,6 +45,8 @@ var _hacking_puzzle: Node
 var _capsule_shape: CapsuleShape3D
 var _mesh_height: float = 1.8
 var _look_touch_id: int = -1
+var _camera_yaw: float = 0.0
+var _camera_pitch: float = 0.0
 
 func _ready() -> void:
 	add_to_group("player")
@@ -69,7 +71,9 @@ func _setup_camera() -> void:
 	camera.fov = 70.0
 	camera.near = 0.1
 	camera.far = 100.0
-	camera_pivot.rotation = Vector3(-deg_to_rad(camera_angle), 0.0, 0.0)
+	_camera_yaw = 0.0
+	_camera_pitch = -deg_to_rad(camera_angle)
+	camera_pivot.rotation = Vector3(_camera_pitch, _camera_yaw, 0.0)
 	camera_pivot.position = Vector3(0.0, camera_height, camera_distance)
 	camera.make_current()
 
@@ -101,8 +105,10 @@ func _handle_movement(delta: float) -> void:
 
 	# Movement follows the camera's yaw, so swiping to look also changes
 	# the direction in which the left joystick moves the character.
-	var local_direction := Vector3(final_input.x, 0.0, final_input.y)
-	var world_direction := local_direction.rotated(Vector3.UP, camera_pivot.global_rotation.y)
+	var local_direction: Vector3 = Vector3(final_input.x, 0.0, final_input.y)
+	# Read a stable yaw value changed only by the dedicated look gesture.
+	# Joystick input never changes the camera angle or feeds back into movement.
+	var world_direction: Vector3 = local_direction.rotated(Vector3.UP, _camera_yaw)
 	var target_velocity: Vector3 = world_direction * current_speed
 
 	if is_on_floor():
@@ -141,11 +147,11 @@ func _handle_stance(delta: float) -> void:
 	mesh.position.y = target_height * 0.5
 
 func _update_camera(delta: float) -> void:
-	var yaw: float = camera_pivot.global_rotation.y
-	var behind_player: Vector3 = Vector3(0.0, 0.0, camera_distance).rotated(Vector3.UP, yaw)
-	var shoulder_offset: Vector3 = Vector3(camera_shoulder_offset, 0.0, 0.0).rotated(Vector3.UP, yaw)
+	var behind_player: Vector3 = Vector3(0.0, 0.0, camera_distance).rotated(Vector3.UP, _camera_yaw)
+	var shoulder_offset: Vector3 = Vector3(camera_shoulder_offset, 0.0, 0.0).rotated(Vector3.UP, _camera_yaw)
 	var target_position: Vector3 = global_position + Vector3(0.0, camera_height, 0.0) + behind_player + shoulder_offset
 	camera_pivot.global_position = camera_pivot.global_position.lerp(target_position, min(camera_smooth_speed * delta, 1.0))
+	camera_pivot.global_rotation = Vector3(_camera_pitch, _camera_yaw, 0.0)
 
 func _check_interaction(delta: float) -> void:
 	# Keyboard interaction is checked every physics frame, not only on the
@@ -205,9 +211,18 @@ func _check_interaction(delta: float) -> void:
 			objective_label.text = "OBJECTIVE: REACH THE TERMINAL  •  DRAG RIGHT SIDE TO LOOK"
 
 func _try_interact_from_hud() -> void:
-	# Called directly by the on-screen Android INTERACT button.
-	if _current_interactable and is_instance_valid(_current_interactable):
+	# Called by a completed INTERACT tap. Refresh target selection immediately,
+	# so a short tap is not lost between the regular range-scan frames.
+	if _in_puzzle:
+		return
+	_interaction_timer = interaction_check_interval
+	_check_interaction(0.0)
+	if is_instance_valid(_current_interactable):
 		_try_interact(_current_interactable, true)
+	else:
+		var objective_label: Node = get_tree().root.find_child("ObjectiveLabel", true, false)
+		if objective_label:
+			objective_label.text = "MOVE CLOSER TO THE TERMINAL"
 
 func _try_interact(interactable: Node3D, from_hud: bool = false) -> void:
 	if not from_hud and not InputManager.is_interacting():
@@ -247,17 +262,28 @@ func _on_puzzle_completed(success: bool) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
+		return
 	if event is InputEventScreenTouch:
 		if event.pressed:
-			# Keep the lower action-button strip free for its own controls.
-			if event.position.x > viewport_size.x * 0.42 and event.position.y > 70.0 and event.position.y < viewport_size.y - 150.0:
+			# Camera look is restricted to the open upper-right gameplay area.
+			# The joystick, the entire bottom button row, and PAUSE are excluded.
+			var point: Vector2 = event.position
+			var in_look_zone: bool = (
+				point.x >= viewport_size.x * 0.52
+				and point.y >= 85.0
+				and point.y <= viewport_size.y - 210.0
+			)
+			if in_look_zone:
 				_look_touch_id = event.index
-		elif event.index == _look_touch_id:
-			_look_touch_id = -1
+		else:
+			if event.index == _look_touch_id:
+				_look_touch_id = -1
 	elif event is InputEventScreenDrag and event.index == _look_touch_id:
-		camera_pivot.rotation.y -= event.relative.x * look_sensitivity
-		camera_pivot.rotation.x = clamp(
-			camera_pivot.rotation.x - event.relative.y * look_sensitivity * 0.65,
+		_camera_yaw = wrapf(_camera_yaw - event.relative.x * look_sensitivity, -TAU, TAU)
+		_camera_pitch = clampf(
+			_camera_pitch - event.relative.y * look_sensitivity * 0.65,
 			deg_to_rad(-45.0),
-			deg_to_rad(-12.0)
+			deg_to_rad(-8.0)
 		)
+		camera_pivot.rotation = Vector3(_camera_pitch, _camera_yaw, 0.0)
