@@ -27,8 +27,10 @@ func _on_button_pressed() -> void:
 			if is_instance_valid(pause_menu):
 				if bool(pause_menu.get("visible")):
 					pause_menu.call("hide_menu")
+				else:
+					pause_menu.call("show_menu")
 			else:
-				pause_menu.call("show_menu")
+				push_warning("PAUSE button could not find PauseMenu in the active scene.")
 		"sprint":
 			# The toggled signal owns sprint state; do not invert it a second time.
 			pass
