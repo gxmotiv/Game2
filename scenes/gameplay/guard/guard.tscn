@@ -37,7 +37,7 @@ render_priority = 1
 
 [node name="Guard" type="CharacterBody3D" scene_instance_id=1]
 script = ExtResource("1")
-patrol_points = [Vector3(-6, 0, -6), Vector3(6, 0, -6), Vector3(6, 0, 2), Vector3(-6, 0, 2)]
+patrol_points = [Vector3(-7, 0, -3), Vector3(-7, 0, 5), Vector3(-4, 0, 5), Vector3(-4, 0, -3)]
 vision_cone_mesh = NodePath("VisionCone")
 state_indicator = NodePath("StateIndicator")
 
