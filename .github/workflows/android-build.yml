@@ -186,6 +186,12 @@ jobs:
           grep -q "STARTUP CHECK OK: mobile controls found." /tmp/godot-boot.log
           test -s build/android/veil_circuit_boot.png
 
+      - name: Test movement and terminal hacking
+        run: |
+          set -euo pipefail
+          godot --audio-driver Dummy --headless --path "$GITHUB_WORKSPACE" --script res://tests/gameplay_smoke.gd 2>&1 | tee /tmp/godot-gameplay-test.log
+          grep -q "GAMEPLAY SMOKE TEST PASSED." /tmp/godot-gameplay-test.log
+
       - name: Upload boot screenshot for review
         if: always()
         uses: actions/upload-artifact@v4
