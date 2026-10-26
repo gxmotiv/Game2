@@ -261,6 +261,9 @@ func _on_puzzle_completed(success: bool) -> void:
 			objective_label.text = "HACK FAILED  •  MOVE CLOSER AND TRY AGAIN"
 
 func _unhandled_input(event: InputEvent) -> void:
+	handle_camera_touch_event(event)
+
+func handle_camera_touch_event(event: InputEvent) -> void:
 	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
 	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
 		return
