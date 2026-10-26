@@ -13,14 +13,23 @@ VEIL CIRCUIT is an original stealth-action game where you play as a cybernetical
 - **Orientation:** Landscape
 - **Connectivity:** Offline-first, no ads, no tracking
 
-## Features (Planned)
+## Current playable slice
 
-- **Playable District:** Procedural 4×4-block city slice with roads, sidewalks, varied low-poly buildings, and collision
-- **Hacking:** Circuit puzzle terminals linked to security lights; additional terminals across the district
-- **Stealth Foundation:** Guard AI and security devices, with wider patrol and mission systems planned
-- **Mobile Controls:** Touch joystick, camera look, sprint, crouch, interact, and pause
-- **Performance:** Batched MultiMesh city visuals, Compatibility renderer, 30 FPS target for low-end Android
-- **Roadmap:** See CITY_DISTRICT_ROADMAP.md for the phased plan toward a larger original hacking sandbox
+- **Playable city district:** Procedural 4×4-block district with roads, sidewalks, lane markings, low-poly buildings, facade windows, rooftop HVAC props, junction lamps, utility cabinets, decorative CCTV housings, and sidewalk bollards.
+- **Player character:** Original low-poly cyber-operative assembled from procedural meshes with dark tactical clothing, armor, backpack, utility belt, and cyan cyber-tech accents.
+- **Hacking:** Interactive circuit puzzle and hackable terminals connected to the security-light network.
+- **Stealth foundation:** Guard patrols and security devices; a larger mission and detection system remains in development.
+- **Mobile controls:** Touch joystick, camera-look area, sprint, crouch, interact, and pause/resume.
+- **Performance strategy:** Godot Compatibility renderer, batched MultiMesh city props, limited dynamic lighting, and a 30 FPS target for low-end Android.
+- **Zero-budget policy:** Built-in Godot geometry/materials and free/open-source resources only; no paid assets, API keys, ads, tracking, or required runtime downloads.
+
+## Planned next milestones
+
+- Improve guard awareness and stealth feedback, then add mission objectives and progression.
+- Add safe, tested character movement and hacking animations.
+- Add optional free licensed sound effects and ambient audio with documented asset licenses.
+- Continue profiling on real Android hardware before raising texture sizes, lighting cost, or scene density.
+- See `docs/OPEN_CITY_ROADMAP.md` for the broader roadmap. Remote camera control, vehicles, drones, and streaming a much larger city are not claimed as complete features.
 
 ## Requirements
 
