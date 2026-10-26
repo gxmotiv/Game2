@@ -49,7 +49,7 @@ enum GameDifficulty {
 }
 
 const GAME_VERSION: String = "0.1.0"
-const TARGET_FPS: int = 60
+const TARGET_FPS: int = 30
 const MAX_SUSPICION: float = 100.0
 const SUSPICION_DECAY_RATE: float = 5.0
 const SUSPICION_RISE_RATE: float = 15.0
