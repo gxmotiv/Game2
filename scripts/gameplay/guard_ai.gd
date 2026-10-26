@@ -246,8 +246,10 @@ func _handle_returning(delta: float) -> void:
 
 func _change_state(new_state: int) -> void:
 	_state = new_state
+	# Keep the oversized translucent cone hidden on mobile; it was tinting most
+	# of the camera view. Actual visibility calculations still run unchanged.
 	if vision_cone_mesh:
-		vision_cone_mesh.visible = new_state in [State.SUSPICIOUS, State.INVESTIGATING, State.ALERT, State.SEARCHING]
+		vision_cone_mesh.visible = false
 	_update_state_indicator()
 	state_changed.emit(_state)
 	
