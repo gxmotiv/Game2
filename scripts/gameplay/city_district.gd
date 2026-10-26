@@ -114,7 +114,7 @@ func _build_city_geometry() -> void:
 				var vent_size := Vector3(_rng.randf_range(0.85, 1.25), 0.34, _rng.randf_range(0.65, 0.95))
 				var vent_position := Vector3(
 					position.x + _rng.randf_range(-0.55, 0.55),
-					height + 0.27,
+					height + 0.25,
 					position.z + _rng.randf_range(-0.55, 0.55)
 				)
 				rooftop_vent_instances.append({"position": vent_position, "size": vent_size})
