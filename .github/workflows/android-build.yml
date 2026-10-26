@@ -151,7 +151,7 @@ jobs:
         run: |
           set -euo pipefail
           export LIBGL_ALWAYS_SOFTWARE=1
-          ERROR_PATTERN='SCRIPT ERROR:|Parse Error|Cannot get class|Parent path .* vanished|ERROR: Failed loading|Invalid assignment of property|_create_mesh_array|NULL MESH INSTANCE|NO ACTIVE 3D CAMERA|PLAYER GROUP MISSING|Failed to retrieve non-existent singleton|valid InputEvent object|Unable to convert array index 0 from "int" to "RID"|Parameter "m" is null'
+          ERROR_PATTERN='SCRIPT ERROR:|Parse Error|Cannot get class|Parent path .* vanished|ERROR: Failed loading|Invalid assignment of property|_create_mesh_array|NULL MESH INSTANCE|NO ACTIVE 3D CAMERA|PLAYER GROUP MISSING|STARTUP CHECK FAILED|Failed to retrieve non-existent singleton|valid InputEvent object|Unable to convert array index 0 from "int" to "RID"|Parameter "m" is null'
 
           xvfb-run -a -s "-screen 0 1280x720x24" godot --audio-driver Dummy --editor --path "$GITHUB_WORKSPACE" --quit 2>&1 | tee /tmp/godot-import.log
           if grep -E "$ERROR_PATTERN" /tmp/godot-import.log; then
@@ -163,9 +163,9 @@ jobs:
           xvfb-run -a -s "-screen 0 1280x720x24" sh -c '
             set -eu
             export LIBGL_ALWAYS_SOFTWARE=1
-            godot --audio-driver Dummy --path "$GITHUB_WORKSPACE" --quit-after 180 > /tmp/godot-boot.log 2>&1 &
+            godot --audio-driver Dummy --path "$GITHUB_WORKSPACE" --quit-after 300 > /tmp/godot-boot.log 2>&1 &
             game_pid=$!
-            sleep 3
+            sleep 2
             import -window root "$GITHUB_WORKSPACE/build/android/veil_circuit_boot.png"
             wait "$game_pid"
           '
@@ -174,6 +174,8 @@ jobs:
             echo "ERROR: Rendered main-scene smoke test found startup errors."
             exit 1
           fi
+          grep -q "STARTUP CHECK OK: active gameplay camera found." /tmp/godot-boot.log
+          grep -q "STARTUP CHECK OK: mobile controls found." /tmp/godot-boot.log
           test -s build/android/veil_circuit_boot.png
 
       - name: Upload boot screenshot for review
