@@ -128,6 +128,12 @@ jobs:
         run: |
           cat $HOME/.config/godot/editor_settings-4.tres
 
+      - name: Restore stable Android debug keystore
+        uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: veil-circuit-debug-keystore-v1-${{ runner.os }}
+
       - name: Prepare Android debug signing
         run: |
           mkdir -p "$HOME/.android"
