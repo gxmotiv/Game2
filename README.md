@@ -1,6 +1,6 @@
 # VEIL CIRCUIT
 
-A mobile-first 2.5D stealth and hacking game built with Godot 4.3 LTS.
+A mobile-first 2.5D stealth and hacking game built with Godot 4.3 LTS, now expanding from a test room into a compact procedural city district.
 
 ## Overview
 
@@ -15,12 +15,12 @@ VEIL CIRCUIT is an original stealth-action game where you play as a cybernetical
 
 ## Features (Planned)
 
-- **Stealth Gameplay:** Vision cones, sound propagation, suspicion meters
-- **Hacking Minigames:** Circuit tracing, pattern matching, timing challenges
-- **2.5D Perspective:** 3D world with orthographic camera
-- **Mobile Controls:** Dual-stick movement + contextual action buttons
-- **Progression:** Upgrade tree, equipment, abilities
-- **Levels:** Hand-crafted facilities, compact city hub
+- **Playable District:** Procedural 4×4-block city slice with roads, sidewalks, varied low-poly buildings, and collision
+- **Hacking:** Circuit puzzle terminals linked to security lights; additional terminals across the district
+- **Stealth Foundation:** Guard AI and security devices, with wider patrol and mission systems planned
+- **Mobile Controls:** Touch joystick, camera look, sprint, crouch, interact, and pause
+- **Performance:** Batched MultiMesh city visuals, Compatibility renderer, 30 FPS target for low-end Android
+- **Roadmap:** See CITY_DISTRICT_ROADMAP.md for the phased plan toward a larger original hacking sandbox
 
 ## Requirements
 
@@ -112,13 +112,34 @@ All assets are original or CC0-licensed:
 - Bfxr/Freesound for audio (CC0)
 - Blender for custom low-poly models
 
+## Low-End Character Visuals
+
+The player operative is generated procedurally in `scripts/gameplay/player_visual.gd`:
+a hooded silhouette, layered tactical armor, backpack, utility belt, boots, and cyan
+hacking visor/device. The geometry is merged into **three material surfaces** instead
+of one renderable node per body part, reducing per-character draw-call overhead.
+It uses no downloaded models, textures, paid services, or runtime dependencies.
+
+The model is a lightweight visual prototype, not yet a rigged/animated production
+character. The Compatibility renderer and 30 FPS target remain in place. Real-device
+frame rate, heat, memory use, and long-session stability must still be measured on
+the target Android phone before making performance guarantees.
+
+## Batched City Facade Details
+
+The procedural district adds dark reflective windows, a restrained mix of cyan-lit
+windows, and rooftop HVAC units. These details are generated from low-poly boxes and
+shared through three MultiMesh batches, rather than creating a separate scene node
+for every window or roof unit. The city keeps its deterministic seed and does not
+download textures or models at runtime.
+
 ## Development Phases
 
-1. **Phase 0:** Project bootstrap (this commit)
-2. **Phase 1:** Vertical slice — single room, player, guard, terminal, HUD
-3. **Phase 2:** Core systems polish + micro-district level
-4. **Phase 3:** City systems, vehicles, progression, full release build
-5. **Phase 4:** Post-launch content (optional)
+1. **Phase 0:** Project bootstrap
+2. **Phase 1:** Playable vertical slice — player, guard, terminal, HUD
+3. **Phase 2:** Compact procedural city district and responsive puzzle input (in progress)
+4. **Phase 3:** Camera/network hacks, traffic systems, mission loop, and progression
+5. **Phase 4:** Streamed district expansion, vehicle prototype, and broader release testing
 
 ## License
 
