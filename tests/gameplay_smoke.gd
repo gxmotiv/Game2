@@ -13,7 +13,7 @@ func _joystick_press(joystick: Control, base: Control, direction: Vector2, touch
 	event.pressed = true
 	var local_point: Vector2 = base.size * 0.5 + direction.normalized() * 48.0
 	event.position = base.get_global_transform_with_canvas() * local_point
-	joystick.handle_touch_event(event)
+	joystick.call("handle_touch_event", event)
 	return event
 
 func _joystick_release(joystick: Control, event: InputEventScreenTouch) -> void:
@@ -21,7 +21,7 @@ func _joystick_release(joystick: Control, event: InputEventScreenTouch) -> void:
 	release.index = event.index
 	release.pressed = false
 	release.position = event.position
-	joystick.handle_touch_event(release)
+	joystick.call("handle_touch_event", release)
 
 func _run_gameplay_smoke_test() -> void:
 	var packed_scene: PackedScene = load("res://scenes/main/main.tscn") as PackedScene
