@@ -7,21 +7,21 @@ func _fail(message: String) -> void:
 	push_error("GAMEPLAY_SMOKE_FAIL: " + message)
 	quit(1)
 
-func _joystick_press(joystick: Control, base: Control, direction: Vector2, touch_index: int) -> InputEventScreenTouch:
+func _joystick_press(joystick: VirtualJoystick, base: Control, direction: Vector2, touch_index: int) -> InputEventScreenTouch:
 	var event := InputEventScreenTouch.new()
 	event.index = touch_index
 	event.pressed = true
 	var local_point: Vector2 = base.size * 0.5 + direction.normalized() * 48.0
 	event.position = base.get_global_transform_with_canvas() * local_point
-	joystick.call("_handle_touch", event)
+	joystick.handle_touch_event(event)
 	return event
 
-func _joystick_release(joystick: Control, event: InputEventScreenTouch) -> void:
+func _joystick_release(joystick: VirtualJoystick, event: InputEventScreenTouch) -> void:
 	var release := InputEventScreenTouch.new()
 	release.index = event.index
 	release.pressed = false
 	release.position = event.position
-	joystick.call("_handle_touch", release)
+	joystick.handle_touch_event(release)
 
 func _run_gameplay_smoke_test() -> void:
 	var packed_scene: PackedScene = load("res://scenes/main/main.tscn") as PackedScene
@@ -44,7 +44,7 @@ func _run_gameplay_smoke_test() -> void:
 		_fail("Main scene is missing Player, Terminal, Guard, HackingPuzzle, InputManager, or MobileHUD.")
 		return
 
-	var joystick: Control = mobile_hud.get_node("JoystickContainer/VirtualJoystick")
+	var joystick: VirtualJoystick = mobile_hud.get_node("JoystickContainer/VirtualJoystick") as VirtualJoystick
 	var base: Control = joystick.get_node("Base")
 	var interact_button: Button = mobile_hud.get_node("ButtonContainer/InteractButton")
 	var sprint_button: Button = mobile_hud.get_node("ButtonContainer/SprintButton")
@@ -109,33 +109,37 @@ func _run_gameplay_smoke_test() -> void:
 	print("GAMEPLAY CHECK OK: forward, backward, left, and right joystick movement all work.")
 
 	# Test crouch and sprint button state using the same handlers bound to actual GUI buttons.
-	crouch_button.call("_on_toggled", true)
+	crouch_button.set_pressed_no_signal(true)
+	crouch_button.emit_signal("toggled", true)
 	await physics_frame
 	if not bool(input_manager.call("is_touch_crouching")) or not bool(player.get("_is_crouching")):
 		_fail("CROUCH button did not activate crouch.")
 		return
-	crouch_button.call("_on_toggled", false)
+	crouch_button.set_pressed_no_signal(false)
+	crouch_button.emit_signal("toggled", false)
 	await physics_frame
 	if bool(input_manager.call("is_touch_crouching")) or bool(player.get("_is_crouching")):
 		_fail("CROUCH button did not release crouch.")
 		return
 
-	sprint_button.call("_on_toggled", true)
+	sprint_button.set_pressed_no_signal(true)
+	sprint_button.emit_signal("toggled", true)
 	if not bool(input_manager.call("is_touch_sprinting")):
 		_fail("SPRINT button did not enable sprint.")
 		return
-	sprint_button.call("_on_button_pressed")
+	sprint_button.emit_signal("pressed")
 	if not bool(input_manager.call("is_touch_sprinting")):
 		_fail("SPRINT tap handler accidentally cancelled sprint.")
 		return
-	sprint_button.call("_on_toggled", false)
+	sprint_button.set_pressed_no_signal(false)
+	sprint_button.emit_signal("toggled", false)
 	if bool(input_manager.call("is_touch_sprinting")):
 		_fail("SPRINT button did not turn sprint off.")
 		return
 	print("GAMEPLAY CHECK OK: CROUCH and SPRINT buttons toggle correctly.")
 
 	# Pause should stop the game, show the overlay, and resume through the menu.
-	pause_button.call("_on_button_pressed")
+	pause_button.emit_signal("pressed")
 	if not paused or not bool(pause_menu.get("visible")):
 		_fail("PAUSE button did not pause the tree and show the pause menu.")
 		return
@@ -152,12 +156,12 @@ func _run_gameplay_smoke_test() -> void:
 	bottom_touch.index = 23
 	bottom_touch.pressed = true
 	bottom_touch.position = Vector2(viewport_size.x * 0.75, viewport_size.y - 170.0)
-	player.call("_unhandled_input", bottom_touch)
+	player.call("handle_camera_touch_event", bottom_touch)
 	var bottom_drag := InputEventScreenDrag.new()
 	bottom_drag.index = 23
 	bottom_drag.position = bottom_touch.position + Vector2(100.0, -10.0)
 	bottom_drag.relative = Vector2(100.0, -10.0)
-	player.call("_unhandled_input", bottom_drag)
+	player.call("handle_camera_touch_event", bottom_drag)
 	if not is_zero_approx(float(player.get("_camera_yaw")) - camera_yaw_before_buttons):
 		_fail("Dragging a side action button area rotated the camera.")
 		return
@@ -180,7 +184,7 @@ func _run_gameplay_smoke_test() -> void:
 		return
 
 	player.call("_check_interaction", 0.1)
-	interact_button.call("_on_button_pressed")
+	interact_button.emit_signal("pressed")
 	await process_frame
 	if not bool(terminal.call("is_hacking_active")) or not bool(puzzle.call("is_puzzle_active")) or not puzzle.visible:
 		_fail("INTERACT button did not open the hacking puzzle.")
