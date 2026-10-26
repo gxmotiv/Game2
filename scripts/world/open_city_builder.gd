@@ -9,6 +9,7 @@ class_name OpenCityBuilder
 
 const TERMINAL_SCENE: PackedScene = preload("res://scenes/gameplay/terminal/terminal.tscn")
 const DEVICE_SCENE: PackedScene = preload("res://scenes/gameplay/city_device.tscn")
+const GUARD_SCENE: PackedScene = preload("res://scenes/gameplay/guard/guard.tscn")
 
 var _rng := RandomNumberGenerator.new()
 var _window_transforms: Array[Transform3D] = []
@@ -26,6 +27,8 @@ func _ready() -> void:
 		_spawn_network_devices()
 	if spawn_district_terminals:
 		_spawn_district_terminals()
+	# Defer patrols until the main scene has registered the player group.
+	call_deferred("_spawn_patrol_guards")
 	print("OPEN CITY READY: 300m district, 36 city blocks, procedural buildings and hackable network devices.")
 
 func _build_ground() -> void:
@@ -312,3 +315,30 @@ func _make_material(color: Color, glow_color: Color = Color.BLACK, glow_strength
 		material.emission = glow_color
 		material.emission_energy_multiplier = glow_strength
 	return material
+
+func _spawn_patrol_guards() -> void:
+	var east_route: Array[Vector3] = [
+		Vector3(45, 0, 45), Vector3(45, 0, 75),
+		Vector3(75, 0, 75), Vector3(75, 0, 45)
+	]
+	var southwest_route: Array[Vector3] = [
+		Vector3(-45, 0, -45), Vector3(-45, 0, -75),
+		Vector3(-75, 0, -75), Vector3(-75, 0, -45)
+	]
+	var far_east_route: Array[Vector3] = [
+		Vector3(85, 0, -45), Vector3(85, 0, -75),
+		Vector3(115, 0, -75), Vector3(115, 0, -45)
+	]
+	_spawn_guard("DistrictGuard_East", east_route)
+	_spawn_guard("DistrictGuard_Southwest", southwest_route)
+	_spawn_guard("DistrictGuard_FarEast", far_east_route)
+
+func _spawn_guard(guard_name: String, patrol_points: Array[Vector3]) -> void:
+	var guard := GUARD_SCENE.instantiate() as CharacterBody3D
+	if guard == null:
+		push_warning("Could not instance patrol guard: " + guard_name)
+		return
+	guard.name = guard_name
+	guard.set("patrol_points", patrol_points)
+	guard.position = patrol_points[0] + Vector3(0.0, 1.0, 0.0)
+	add_child(guard)
