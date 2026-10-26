@@ -340,10 +340,16 @@ func reset_guard_suspicion(guard_id: int) -> void:
 		suspicion_changed.emit(guard_id, 0.0)
 
 func get_all_guards() -> Array[int]:
-	return _guard_data.keys()
+	var guard_ids: Array[int] = []
+	for guard_id in _guard_data.keys():
+		guard_ids.append(int(guard_id))
+	return guard_ids
 
 func get_all_players() -> Array[int]:
-	return _player_data.keys()
+	var player_ids: Array[int] = []
+	for player_id in _player_data.keys():
+		player_ids.append(int(player_id))
+	return player_ids
 
 func is_player_detected_by_any_guard(player_id: int) -> bool:
 	if not _player_data.has(player_id):
