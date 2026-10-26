@@ -260,11 +260,23 @@ func is_sprinting() -> bool:
 func is_crouching() -> bool:
 	return Input.is_action_pressed("crouch")
 
+func set_touch_interact(pressed: bool) -> void:
+	if pressed:
+		_virtual_actions["touch_interact_just_pressed"] = true
+
+func set_touch_pause(pressed: bool) -> void:
+	if pressed:
+		_virtual_actions["touch_pause_just_pressed"] = true
+
 func is_interacting() -> bool:
-	return Input.is_action_just_pressed("interact")
+	var touch_pressed: bool = bool(_virtual_actions["touch_interact_just_pressed"])
+	_virtual_actions["touch_interact_just_pressed"] = false
+	return touch_pressed or Input.is_action_just_pressed("interact")
 
 func is_paused() -> bool:
-	return Input.is_action_just_pressed("pause")
+	var touch_pressed: bool = bool(_virtual_actions["touch_pause_just_pressed"])
+	_virtual_actions["touch_pause_just_pressed"] = false
+	return touch_pressed or Input.is_action_just_pressed("pause")
 
 func get_hack_direction() -> Vector2:
 	return Input.get_vector("hack_left", "hack_right", "hack_up", "hack_down", 0.5)
@@ -279,7 +291,9 @@ func is_hack_cancel() -> bool:
 var _virtual_actions: Dictionary = {
 	"touch_move_vector": Vector2.ZERO,
 	"touch_sprint": false,
-	"touch_crouch": false
+	"touch_crouch": false,
+	"touch_interact_just_pressed": false,
+	"touch_pause_just_pressed": false
 }
 
 func set_touch_move_vector(vector: Vector2) -> void:
