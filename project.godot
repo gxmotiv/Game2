@@ -8,8 +8,10 @@ config/version="0.1.0"
 config/icon="res://assets/textures/icon.png"
 run/main_scene="res://scenes/main/main.tscn"
 run/first_scene="res://scenes/main/main.tscn"
-run/low_processor_usage_mode="on"
-run/low_processor_usage_sleep_usec=10000
+; Keep continuous gameplay redraws while limiting heat and battery use on low-end Android.
+run/low_processor_mode=false
+run/low_processor_mode_sleep_usec=6900
+run/max_fps=30
 
 [display]
 
