@@ -97,6 +97,8 @@ func _setup_vision_cone() -> void:
 			cone.height = cone_range
 			cone.bottom_radius = cone_range * tan(deg_to_rad(cone_angle * 0.5))
 			cone.top_radius = 0.0
+	# Do not wash the whole screen with the cone while the guard is calm.
+	vision_cone_mesh.visible = false
 
 func _physics_process(delta: float) -> void:
 	_detection_timer += delta
@@ -244,6 +246,8 @@ func _handle_returning(delta: float) -> void:
 
 func _change_state(new_state: int) -> void:
 	_state = new_state
+	if vision_cone_mesh:
+		vision_cone_mesh.visible = new_state in [State.SUSPICIOUS, State.INVESTIGATING, State.ALERT, State.SEARCHING]
 	_update_state_indicator()
 	state_changed.emit(_state)
 	
