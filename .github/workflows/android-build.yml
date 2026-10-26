@@ -177,6 +177,7 @@ jobs:
       - name: Validate Godot project and render a boot frame
         run: |
           set -euo pipefail
+          echo "Validating city district startup and mobile gameplay"
           export LIBGL_ALWAYS_SOFTWARE=1
           ERROR_PATTERN='SCRIPT ERROR:|Parse Error|Cannot get class|Parent path .* vanished|ERROR: Failed loading|Invalid assignment of property|_create_mesh_array|NULL MESH INSTANCE|NO ACTIVE 3D CAMERA|PLAYER GROUP MISSING|STARTUP CHECK FAILED|Failed to retrieve non-existent singleton|valid InputEvent object|Unable to convert array index 0 from "int" to "RID"|Parameter "m" is null'
 
