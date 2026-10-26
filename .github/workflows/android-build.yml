@@ -49,10 +49,28 @@ jobs:
           ls -la project.godot export_presets.cfg
           ls -la assets/textures/icon.png
 
-      - name: Install system dependencies
+      - name: Verify system dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y unzip wget curl libfontconfig1 libx11-6 libxext6 libxrender1 libxi6 libxtst6 libgl1 libgl1-mesa-dri xvfb imagemagick
+          set -euo pipefail
+          # GitHub's ubuntu-latest image normally includes these. Avoid a full
+          # apt-get update on every build; install only if the runner is missing
+          # a required command/library.
+          missing=0
+          for cmd in unzip wget curl xvfb-run import; do
+            if ! command -v "$cmd" >/dev/null 2>&1; then
+              echo "Missing command: $cmd"
+              missing=1
+            fi
+          done
+          for lib in libfontconfig.so.1 libX11.so.6 libXext.so.6 libXrender.so.1 libXi.so.6 libXtst.so.6 libGL.so.1; do
+            if ! ldconfig -p | grep -Fq "$lib"; then
+              echo "Missing library: $lib"
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            sudo apt-get install -y unzip wget curl libfontconfig1 libx11-6 libxext6 libxrender1 libxi6 libxtst6 libgl1 libgl1-mesa-dri xvfb imagemagick
+          fi
 
       - name: Download and install Android SDK
         run: |
