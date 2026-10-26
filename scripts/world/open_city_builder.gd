@@ -18,6 +18,7 @@ var _window_colors: Array[Color] = []
 func _ready() -> void:
 	_rng.seed = 741029
 	add_to_group("open_world")
+	_add_mobile_sunlight()
 	_build_ground()
 	_build_roads_and_sidewalks()
 	_build_buildings()
@@ -30,6 +31,18 @@ func _ready() -> void:
 	# Defer patrols until the main scene has registered the player group.
 	call_deferred("_spawn_patrol_guards")
 	print("OPEN CITY READY: 300m district, 36 city blocks, procedural buildings and hackable network devices.")
+
+
+func _add_mobile_sunlight() -> void:
+	# One non-shadow-casting directional light keeps the whole district readable
+	# without a per-building light budget on low-end mobile GPUs.
+	var sunlight := DirectionalLight3D.new()
+	sunlight.name = "DistrictSunlight"
+	sunlight.rotation = Vector3(deg_to_rad(-52.0), deg_to_rad(-28.0), 0.0)
+	sunlight.light_color = Color(0.78, 0.86, 1.0)
+	sunlight.light_energy = 1.15
+	sunlight.shadow_enabled = false
+	add_child(sunlight)
 
 func _build_ground() -> void:
 	var ground := StaticBody3D.new()
