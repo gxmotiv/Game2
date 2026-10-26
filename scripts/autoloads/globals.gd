@@ -74,6 +74,7 @@ var inverted_camera_y: bool = false
 var camera_sensitivity: float = 1.0
 
 func _ready() -> void:
+	Engine.max_fps = TARGET_FPS
 	_load_settings()
 	call_deferred("_apply_volumes_deferred")
 
