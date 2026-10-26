@@ -90,7 +90,7 @@ offset_left = -60.0
 offset_top = -60.0
 offset_right = 60.0
 offset_bottom = 60.0
-custom_styles/panel = SubResource("3")
+theme_override_styles/panel = SubResource("3")
 mouse_filter = 2
 
 [node name="Stick" type="Control" parent="VirtualJoystick"]
@@ -104,7 +104,7 @@ offset_left = -30.0
 offset_top = -30.0
 offset_right = 30.0
 offset_bottom = 30.0
-custom_styles/panel = SubResource("4")
+theme_override_styles/panel = SubResource("4")
 mouse_filter = 2
 
 [node name="ButtonContainer" type="HBoxContainer" parent="."]
