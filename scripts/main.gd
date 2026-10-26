@@ -63,6 +63,7 @@ func _ready() -> void:
 			if not network_node.is_connected("hack_completed", callback):
 				network_node.connect("hack_completed", callback)
 	print("CITY CHECK OK: %d hackable network nodes registered." % _network_nodes_total)
+	call_deferred("_refresh_network_objective")
 
 	# Lightweight startup assertions: if any of these fail, the CI smoke test
 	# can catch the broken scene before an APK is handed to the phone tester.
