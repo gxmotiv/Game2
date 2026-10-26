@@ -127,6 +127,8 @@ rotation = Vector3(-0.785398, 0.785398, 0)
 [node name="SecurityLight" type="Node3D" parent="."]
 script = ExtResource("1")
 position = Vector3(6.0, 8.5, 0.0)
+light_node = NodePath("SecurityLightOmni")
+light_mesh = NodePath("SecurityLightMesh")
 light_mesh = NodePath("SecurityLightMesh")
 light_node = NodePath("SecurityLightOmni")
 
