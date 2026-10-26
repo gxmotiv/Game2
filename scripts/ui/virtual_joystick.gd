@@ -28,15 +28,18 @@ func _ready() -> void:
 		pass  # Will call InputManager.set_touch_move_vector in _update_stick_position
 
 func _hide_stick() -> void:
+	# Visual-only helper. Do not call _reset_stick_internal() here: reset also
+	# hides the stick, so calling it from both functions caused infinite recursion.
 	_stick_node.visible = false
 	_base_node.modulate = Color(1, 1, 1, 0.3)
-	_reset_stick_internal()
 
 func _show_stick() -> void:
 	_stick_node.visible = true
 	_base_node.modulate = Color(1, 1, 1, 0.6)
 
-func _gui_input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:
+	# Read screen-space touch events globally so release/drag still works after
+	# a finger moves just outside the joystick's Control rectangle.
 	if event is InputEventScreenTouch:
 		_handle_touch(event)
 	elif event is InputEventScreenDrag:
