@@ -40,10 +40,6 @@ signal sound_event(position: Vector3, loudness: float, source_id: int)
 var _guard_data: Dictionary = {}
 var _player_data: Dictionary = {}
 var _sound_events: Array = []
-var _physics_space: PhysicsDirectSpaceState3D
-
-func _ready() -> void:
-	_physics_space = PhysicsServer3D.space_get_direct_state(get_tree().root.get_world_3d().space)
 
 func register_guard(guard_id: int, guard_node: Node3D, cone_angle: float = -1.0, cone_range: float = -1.0, hearing_range: float = -1.0) -> void:
 	_guard_data[guard_id] = {
@@ -168,12 +164,25 @@ func calculate_visibility_with_obstruction(player_pos: Vector3, guard_pos: Vecto
 	return base_visibility * stance_mult * light_mult
 
 func _has_line_of_sight(from: Vector3, to: Vector3) -> bool:
-	var query = PhysicsRayQueryParameters3D.create(from + Vector3(0, vision_height_offset, 0), to + Vector3(0, vision_height_offset, 0))
+	var query := PhysicsRayQueryParameters3D.create(
+		from + Vector3(0.0, vision_height_offset, 0.0),
+		to + Vector3(0.0, vision_height_offset, 0.0)
+	)
 	query.collision_mask = 1
-	query.exclude = []
-	
-	var result = _physics_space.intersect_ray(query)
-	return result.is_empty()
+
+	# This script is an autoload and has no guaranteed World3D during _ready().
+	# Get the direct space state from a live scene node instead of caching a
+	# possibly-invalid physics-space RID at startup.
+	var space_state: PhysicsDirectSpaceState3D = null
+	for guard_id in _guard_data:
+		var guard_node: Node3D = _guard_data[guard_id].get("node") as Node3D
+		if is_instance_valid(guard_node) and guard_node.is_inside_tree():
+			space_state = guard_node.get_world_3d().direct_space_state
+			break
+	if space_state == null:
+		return true
+
+	return space_state.intersect_ray(query).is_empty()
 
 func _get_stance_visibility_multiplier(stance: int) -> float:
 	match stance:
@@ -285,6 +294,14 @@ func _process_hearing() -> void:
 					if guard.state < 2:
 						guard.investigation_target = event.position
 
+func set_guard_suspicion(guard_id: int, suspicion: float) -> void:
+	if not _guard_data.has(guard_id):
+		return
+	var safe_value: float = clampf(suspicion, 0.0, 100.0)
+	_guard_data[guard_id]["suspicion"] = safe_value
+	_guard_data[guard_id]["decay_timer"] = suspicion_decay_delay
+	suspicion_changed.emit(guard_id, safe_value)
+
 func get_guard_suspicion(guard_id: int) -> float:
 	if _guard_data.has(guard_id):
 		return _guard_data[guard_id].suspicion
@@ -323,10 +340,16 @@ func reset_guard_suspicion(guard_id: int) -> void:
 		suspicion_changed.emit(guard_id, 0.0)
 
 func get_all_guards() -> Array[int]:
-	return _guard_data.keys()
+	var guard_ids: Array[int] = []
+	for guard_id in _guard_data.keys():
+		guard_ids.append(int(guard_id))
+	return guard_ids
 
 func get_all_players() -> Array[int]:
-	return _player_data.keys()
+	var player_ids: Array[int] = []
+	for player_id in _player_data.keys():
+		player_ids.append(int(player_id))
+	return player_ids
 
 func is_player_detected_by_any_guard(player_id: int) -> bool:
 	if not _player_data.has(player_id):
