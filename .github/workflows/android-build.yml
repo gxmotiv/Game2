@@ -196,6 +196,8 @@ jobs:
       - name: Build Android Debug APK
         run: |
           set -e
+          # Use a monotonic version code so later APKs can update earlier debug installs.
+          sed -i "0,/^version\/code=.*/s//version\/code=${GITHUB_RUN_NUMBER}/" export_presets.cfg
           mkdir -p build/android
           export ANDROID_HOME="$HOME/android-sdk"
           export ANDROID_SDK_ROOT="$HOME/android-sdk"
