@@ -1,5 +1,22 @@
 extends Node
 
+func _enter_tree() -> void:
+	# A few Android/debug scene instantiations have returned UI nodes without
+	# their serialized script instance. Ensure PauseMenu's script is present
+	before its _ready() connects Resume/Restart/Settings/Quit buttons.
+	_ensure_node_script("PauseMenu", "res://scripts/ui/pause_menu.gd")
+
+func _ensure_node_script(node_path: String, script_path: String) -> void:
+	var target: Node = get_node_or_null(node_path)
+	if target == null:
+		return
+	var desired_script: Script = load(script_path) as Script
+	if desired_script == null:
+		push_error("Failed to load required scene script: " + script_path)
+		return
+	if target.get_script() != desired_script:
+		target.set_script(desired_script)
+
 func _ready() -> void:
 	# Explicitly start with all modal overlays closed. This is a safety net in
 	# addition to each overlay's own _ready() setup, and prevents a visible
