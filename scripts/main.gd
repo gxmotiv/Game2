@@ -7,14 +7,15 @@ func _ready() -> void:
 		push_warning("Main scene is missing Terminal or World; check main.tscn scene instances.")
 		return
 
-	var test_room := world.find_child("TestRoom", true, false)
-	if test_room == null:
-		push_warning("Training room was not found; the security light link is unavailable.")
-		return
-
-	var security_light := test_room.get_node_or_null("SecurityLight")
-	if security_light and terminal.has_method("set"):
+	# The instanced training room is renamed to "World" in main.tscn, so
+	# search for its security light directly rather than looking for a nested
+	# node named "TestRoom". Continue startup checks even if the optional link
+	# is missing.
+	var security_light := world.find_child("SecurityLight", true, false) as Node3D
+	if security_light != null and terminal.has_method("set"):
 		terminal.set("linked_security_device", security_light)
+	else:
+		push_warning("SecurityLight was not found; terminal can still be hacked, but it cannot disable the light.")
 
 	# Lightweight startup assertions: if any of these fail, the CI smoke test
 	# can catch the broken scene before an APK is handed to the phone tester.
