@@ -19,7 +19,7 @@ top_radius = 0.0
 radial_segments = 16
 
 [sub_resource type="StandardMaterial3D" id="6"]
-albedo_color = Color(1.0, 0.3, 0.1, 0.15)
+albedo_color = Color(1.0, 0.3, 0.1, 0.07)
 cull_mode = 0
 transparency = 1
 render_priority = 1
@@ -55,7 +55,7 @@ mesh = SubResource("5")
 material_override = SubResource("6")
 position = Vector3(0, 1.7, 0)
 rotation = Vector3(-1.5708, 0, 0)
-visible = true
+visible = false
 
 [node name="StateIndicator" type="MeshInstance3D" parent="."]
 name = "StateIndicator"

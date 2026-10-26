@@ -2,35 +2,52 @@ extends Button
 class_name TouchButton
 
 @export var action_name: String = ""
-@export var hold_mode: bool = false
 
 func _ready() -> void:
+	focus_mode = Control.FOCUS_NONE
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	button_down.connect(_on_button_down)
-	button_up.connect(_on_button_up)
-	toggled.connect(_on_toggled)
+	if not pressed.is_connected(_on_button_pressed):
+		pressed.connect(_on_button_pressed)
+	if not toggled.is_connected(_on_toggled):
+		toggled.connect(_on_toggled)
+	_update_feedback()
 
-func _on_button_down() -> void:
+func _on_button_pressed() -> void:
+	if not is_instance_valid(InputManager):
+		return
+
 	match action_name:
 		"interact":
-			# Direct callback is reliable on Android; don't depend on keyboard InputMap.
-			var player := get_tree().get_first_node_in_group("player")
-			if player and player.has_method("_try_interact_from_hud"):
+			# Activate on a completed tap, and ask the player to refresh range first.
+			var player: Node = get_tree().get_first_node_in_group("player")
+			if is_instance_valid(player) and player.has_method("_try_interact_from_hud"):
 				player.call("_try_interact_from_hud")
-		"sprint":
-			InputManager.set_touch_sprint(true)
 		"pause":
-			var pause_menu := get_tree().root.find_child("PauseMenu", true, false)
-			if pause_menu:
-				if pause_menu.visible:
+			var pause_menu: Node = get_tree().root.find_child("PauseMenu", true, false)
+			if is_instance_valid(pause_menu):
+				if bool(pause_menu.get("visible")):
 					pause_menu.call("hide_menu")
 				else:
 					pause_menu.call("show_menu")
+			else:
+				push_warning("PAUSE button could not find PauseMenu in the active scene.")
+		"sprint":
+			# The toggled signal owns sprint state; do not invert it a second time.
+			pass
+	_update_feedback()
 
-func _on_button_up() -> void:
-	if action_name == "sprint":
-		InputManager.set_touch_sprint(false)
+func _on_toggled(is_on: bool) -> void:
+	if not is_instance_valid(InputManager):
+		return
+	match action_name:
+		"crouch":
+			InputManager.set_touch_crouch(is_on)
+		"sprint":
+			InputManager.set_touch_sprint(is_on)
+	_update_feedback()
 
-func _on_toggled(button_pressed: bool) -> void:
-	if action_name == "crouch":
-		InputManager.set_touch_crouch(button_pressed)
+func _update_feedback() -> void:
+	if button_pressed:
+		modulate = Color(0.8, 1.0, 0.8, 1.0)
+	else:
+		modulate = Color(1.0, 1.0, 1.0, 0.9)

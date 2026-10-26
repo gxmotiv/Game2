@@ -97,6 +97,8 @@ func _setup_vision_cone() -> void:
 			cone.height = cone_range
 			cone.bottom_radius = cone_range * tan(deg_to_rad(cone_angle * 0.5))
 			cone.top_radius = 0.0
+	# Do not wash the whole screen with the cone while the guard is calm.
+	vision_cone_mesh.visible = false
 
 func _physics_process(delta: float) -> void:
 	_detection_timer += delta
@@ -189,7 +191,7 @@ func _handle_state_machine(delta: float) -> void:
 	elif _state == State.RETURNING:
 		if _player_visible:
 			_change_state(State.ALERT)
-		elif global_position.distance_to(_target_position) < 1.0:
+		elif Vector2(global_position.x, global_position.z).distance_to(Vector2(_target_position.x, _target_position.z)) < 1.0:
 			_change_state(State.PATROL)
 	
 	if _state != old_state:
@@ -199,7 +201,7 @@ func _handle_patrol(delta: float) -> void:
 	if patrol_points.size() == 0:
 		return
 	
-	var distance = global_position.distance_to(_target_position)
+	var distance = Vector2(global_position.x, global_position.z).distance_to(Vector2(_target_position.x, _target_position.z))
 	
 	if distance < 1.0:
 		_patrol_timer += delta
@@ -218,7 +220,7 @@ func _handle_suspicious(delta: float) -> void:
 func _handle_investigating(delta: float) -> void:
 	_investigation_timer -= delta
 	
-	var distance = global_position.distance_to(_target_position)
+	var distance = Vector2(global_position.x, global_position.z).distance_to(Vector2(_target_position.x, _target_position.z))
 	if distance < 1.5:
 		_investigation_timer = investigation_time
 		_target_position = _last_known_player_pos + Vector3(randf_range(-3, 3), 0, randf_range(-3, 3))
@@ -233,7 +235,7 @@ func _handle_alert(delta: float) -> void:
 func _handle_searching(delta: float) -> void:
 	_search_timer -= delta
 	
-	var distance = global_position.distance_to(_target_position)
+	var distance = Vector2(global_position.x, global_position.z).distance_to(Vector2(_target_position.x, _target_position.z))
 	if distance < 1.5:
 		_target_position = _last_known_player_pos + Vector3(randf_range(-4, 4), 0, randf_range(-4, 4))
 
@@ -244,6 +246,10 @@ func _handle_returning(delta: float) -> void:
 
 func _change_state(new_state: int) -> void:
 	_state = new_state
+	# Keep the oversized translucent cone hidden on mobile; it was tinting most
+	# of the camera view. Actual visibility calculations still run unchanged.
+	if vision_cone_mesh:
+		vision_cone_mesh.visible = false
 	_update_state_indicator()
 	state_changed.emit(_state)
 	
@@ -285,7 +291,7 @@ func _handle_movement(delta: float) -> void:
 			current_speed = max_speed
 	
 	# Smooth rotation toward target
-	var target_angle = atan2(to_target.x, to_target.z)
+	var target_angle = atan2(-to_target.x, -to_target.z)
 	var current_angle = rotation.y
 	var angle_diff = wrapf(target_angle - current_angle, -PI, PI)
 	rotation.y = current_angle + angle_diff * min(turn_speed * delta, 1.0)

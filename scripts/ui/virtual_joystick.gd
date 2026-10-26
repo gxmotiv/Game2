@@ -20,7 +20,10 @@ func _ready() -> void:
 	set_process_input(true)
 	_stick_node = get_node("Stick")
 	_base_node = get_node("Base")
+	_base_node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_stick_node.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_center_pos = _base_node.position + _base_node.size * 0.5
+	_stick_node.position = _base_node.position + (_base_node.size - _stick_node.size) * 0.5
 	_hide_stick()
 	
 	# Connect to InputManager
@@ -41,16 +44,22 @@ func _input(event: InputEvent) -> void:
 	# Read screen-space touch events globally so release/drag still works after
 	# a finger moves just outside the joystick's Control rectangle.
 	if event is InputEventScreenTouch:
-		_handle_touch(event)
+		handle_touch_event(event)
 	elif event is InputEventScreenDrag:
-		_handle_drag(event)
+		handle_drag_event(event)
+
+func handle_touch_event(event: InputEventScreenTouch) -> void:
+	_handle_touch(event)
+
+func handle_drag_event(event: InputEventScreenDrag) -> void:
+	_handle_drag(event)
 
 func _handle_touch(event: InputEventScreenTouch) -> void:
 	# Convert the actual touch point into the joystick's local coordinates.
 	var local_pos: Vector2 = _base_node.get_global_transform_with_canvas().affine_inverse() * event.position
 	var distance = local_pos.distance_to(_base_node.size * 0.5)
 	
-	if event.pressed and distance <= max_radius:
+	if event.pressed and not _dragging and distance <= max_radius:
 		_dragging = true
 		_touch_id = event.index
 		_show_stick()
@@ -63,16 +72,17 @@ func _handle_drag(event: InputEventScreenDrag) -> void:
 		var local_pos: Vector2 = _base_node.get_global_transform_with_canvas().affine_inverse() * event.position
 		_update_stick_position(local_pos)
 
-func _update_stick_position(screen_pos: Vector2) -> void:
-	var relative = screen_pos - _base_node.size * 0.5
-	var distance = relative.length()
-	
+func _update_stick_position(base_local_pos: Vector2) -> void:
+	var relative: Vector2 = base_local_pos - _base_node.size * 0.5
+	var distance: float = relative.length()
+
 	if distance > visual_radius:
 		relative = relative.normalized() * visual_radius
 		distance = visual_radius
-	
-	var stick_pos = _base_node.size * 0.5 + relative
-	_stick_node.position = stick_pos
+
+	# Stick is a sibling of Base, so convert from Base-local coordinates and
+	# subtract half its size to keep its center under the user's finger.
+	_stick_node.position = _base_node.position + _base_node.size * 0.5 + relative - _stick_node.size * 0.5
 	
 	if distance > deadzone * visual_radius:
 		var strength = (distance - deadzone * visual_radius) / (visual_radius * (1.0 - deadzone))
@@ -92,7 +102,7 @@ func _reset_stick_internal() -> void:
 	_dragging = false
 	_touch_id = -1
 	_current_vector = Vector2.ZERO
-	_stick_node.position = _base_node.size * 0.5
+	_stick_node.position = _base_node.position + (_base_node.size - _stick_node.size) * 0.5
 	_hide_stick()
 	if InputManager:
 		InputManager.set_touch_move_vector(Vector2.ZERO)

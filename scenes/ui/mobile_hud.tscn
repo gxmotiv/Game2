@@ -1,7 +1,8 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/virtual_joystick.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/ui/touch_button.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/ui/mobile_hud.gd" id="3"]
 
 [sub_resource type="StyleBoxFlat" id="3"]
 bg_color = Color(0.1, 0.1, 0.15, 0.8)
@@ -64,6 +65,7 @@ corner_radius_top_left = 10
 corner_radius_top_right = 10
 
 [node name="MobileHUD" type="CanvasLayer" scene_instance_id=1]
+script = ExtResource("3")
 layer = 10
 
 [node name="TitleLabel" type="Label" parent="."]
@@ -131,7 +133,7 @@ offset_top = -80.0
 offset_right = 80.0
 offset_bottom = 80.0
 
-[node name="Base" type="Control" parent="JoystickContainer/VirtualJoystick"]
+[node name="Base" type="Panel" parent="JoystickContainer/VirtualJoystick"]
 layout_mode = 3
 anchors_preset = 5
 anchor_left = 0.5
@@ -145,7 +147,7 @@ offset_bottom = 60.0
 theme_override_styles/panel = SubResource("3")
 mouse_filter = 2
 
-[node name="Stick" type="Control" parent="JoystickContainer/VirtualJoystick"]
+[node name="Stick" type="Panel" parent="JoystickContainer/VirtualJoystick"]
 layout_mode = 3
 anchors_preset = 5
 anchor_left = 0.5
@@ -183,7 +185,9 @@ mouse_filter = 0
 
 [node name="SprintButton" type="Button" parent="ButtonContainer" script=ExtResource("2")]
 action_name = "sprint"
+toggle_mode = true
 theme_override_styles/normal = SubResource("5")
+theme_override_styles/pressed = SubResource("4")
 text = "SPRINT"
 theme_override_font_sizes/font_size = 14
 theme_override_colors/font_color = Color(1, 1, 1, 1)
