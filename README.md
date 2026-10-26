@@ -112,6 +112,19 @@ All assets are original or CC0-licensed:
 - Bfxr/Freesound for audio (CC0)
 - Blender for custom low-poly models
 
+## Low-End Character Visuals
+
+The player operative is generated procedurally in `scripts/gameplay/player_visual.gd`:
+a hooded silhouette, layered tactical armor, backpack, utility belt, boots, and cyan
+hacking visor/device. The geometry is merged into **three material surfaces** instead
+of one renderable node per body part, reducing per-character draw-call overhead.
+It uses no downloaded models, textures, paid services, or runtime dependencies.
+
+The model is a lightweight visual prototype, not yet a rigged/animated production
+character. The Compatibility renderer and 30 FPS target remain in place. Real-device
+frame rate, heat, memory use, and long-session stability must still be measured on
+the target Android phone before making performance guarantees.
+
 ## Development Phases
 
 1. **Phase 0:** Project bootstrap
