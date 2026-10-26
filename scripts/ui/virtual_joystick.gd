@@ -44,9 +44,15 @@ func _input(event: InputEvent) -> void:
 	# Read screen-space touch events globally so release/drag still works after
 	# a finger moves just outside the joystick's Control rectangle.
 	if event is InputEventScreenTouch:
-		_handle_touch(event)
+		handle_touch_event(event)
 	elif event is InputEventScreenDrag:
-		_handle_drag(event)
+		handle_drag_event(event)
+
+func handle_touch_event(event: InputEventScreenTouch) -> void:
+	_handle_touch(event)
+
+func handle_drag_event(event: InputEventScreenDrag) -> void:
+	_handle_drag(event)
 
 func _handle_touch(event: InputEventScreenTouch) -> void:
 	# Convert the actual touch point into the joystick's local coordinates.
