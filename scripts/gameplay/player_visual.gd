@@ -102,12 +102,13 @@ func _add_triangle(tool: SurfaceTool, a: Vector3, b: Vector3, c: Vector3) -> voi
 	var normal: Vector3 = (b - a).cross(c - a).normalized()
 	if normal.length_squared() < 0.5:
 		return
+	# Godot 4 uses clockwise front-face winding; keep the outward normal and reverse vertex order.
 	tool.set_normal(normal)
 	tool.add_vertex(a)
 	tool.set_normal(normal)
-	tool.add_vertex(b)
-	tool.set_normal(normal)
 	tool.add_vertex(c)
+	tool.set_normal(normal)
+	tool.add_vertex(b)
 
 func _add_sphere(tool: SurfaceTool, center: Vector3, radius: float) -> void:
 	for ring in range(SPHERE_RINGS):
