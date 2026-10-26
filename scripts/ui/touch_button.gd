@@ -19,6 +19,13 @@ func _on_button_down() -> void:
 				player.call("_try_interact_from_hud")
 		"sprint":
 			InputManager.set_touch_sprint(true)
+		"pause":
+			var pause_menu := get_tree().root.find_child("PauseMenu", true, false)
+			if pause_menu:
+				if pause_menu.visible:
+					pause_menu.call("hide_menu")
+				else:
+					pause_menu.call("show_menu")
 
 func _on_button_up() -> void:
 	if action_name == "sprint":
