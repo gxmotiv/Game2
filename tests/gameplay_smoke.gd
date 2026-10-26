@@ -45,6 +45,13 @@ func _run_gameplay_smoke_test() -> void:
 		return
 
 	var joystick: Control = mobile_hud.get_node("JoystickContainer/VirtualJoystick") as Control
+	var joystick_script: Script = joystick.get_script() as Script
+	print("JOYSTICK_DIAGNOSTIC: script=", joystick_script.resource_path if joystick_script != null else "NULL",
+		" has_handle=", joystick.has_method("handle_touch_event"),
+		" has_input=", joystick.has_method("_input"))
+	if joystick_script == null or not joystick.has_method("handle_touch_event"):
+		_fail("VirtualJoystick script is not attached or its public touch handler is unavailable.")
+		return
 	var base: Control = joystick.get_node("Base")
 	var interact_button: Button = mobile_hud.get_node("ButtonContainer/InteractButton")
 	var sprint_button: Button = mobile_hud.get_node("ButtonContainer/SprintButton")
