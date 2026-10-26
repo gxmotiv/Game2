@@ -40,6 +40,8 @@ corner_radius_top_right = 8
 
 [node name="PauseMenu" type="CanvasLayer" scene_instance_id=1]
 script = ExtResource("1")
+visible = false
+script = ExtResource("1")
 layer = 20
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
