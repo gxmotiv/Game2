@@ -2,7 +2,9 @@ name: Build Android Debug APK
 
 on:
   push:
-    branches: [kilo/airy-chime-uvv]
+    branches: [kilo/airy-chime-uvv, fix/playable-mobile-controls]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -142,6 +144,12 @@ jobs:
           test -x "$HOME/android-sdk/build-tools/34.0.0/apksigner"
           test -f "$JAVA_HOME/bin/java"
           test -f "$HOME/.android/debug.keystore"
+
+      - name: Headless import and startup smoke test
+        run: |
+          set -e
+          godot --headless --path "$GITHUB_WORKSPACE" --editor --quit
+          godot --headless --path "$GITHUB_WORKSPACE" --quit-after 5
 
       - name: Build Android Debug APK
         run: |

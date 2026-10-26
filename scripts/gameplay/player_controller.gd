@@ -38,8 +38,8 @@ var mesh: MeshInstance3D
 var _target_velocity: Vector3 = Vector3.ZERO
 var _is_sprinting: bool = false
 var _is_crouching: bool = false
+var _keyboard_crouching: bool = false
 var _target_camera_pos: Vector3 = Vector3.ZERO
-var _interaction_timer: float = 0.0
 var _current_interactable: Node3D = null
 var _in_puzzle: bool = false
 var _hacking_puzzle: CanvasLayer
@@ -55,7 +55,6 @@ func _ready() -> void:
 	_mesh_height = 1.8
 	
 	_setup_camera()
-	_setup_input()
 	
 	# Find hacking puzzle in scene tree
 	_hacking_puzzle = get_tree().root.find_child("HackingPuzzle", true, false)
@@ -73,175 +72,143 @@ func _setup_camera() -> void:
 	camera_pivot.rotation = Vector3(-angle_rad, 0, 0)
 	camera_pivot.position = Vector3(0, camera_height, camera_distance)
 
-func _setup_input() -> void:
-	InputManager.register_custom_action("move_left", InputManager.ACTION_TYPE_AXIS, 0.15, [
-		{"type": "InputEventKey", "physical_keycode": 65}
-	])
-	InputManager.register_custom_action("move_right", InputManager.ACTION_TYPE_AXIS, 0.15, [
-		{"type": "InputEventKey", "physical_keycode": 68}
-	])
-	InputManager.register_custom_action("move_forward", InputManager.ACTION_TYPE_AXIS, 0.15, [
-		{"type": "InputEventKey", "physical_keycode": 87}
-	])
-	InputManager.register_custom_action("move_backward", InputManager.ACTION_TYPE_AXIS, 0.15, [
-		{"type": "InputEventKey", "physical_keycode": 83}
-	])
-	InputManager.register_custom_action("sprint", InputManager.ACTION_TYPE_BUTTON, 0.5, [
-		{"type": "InputEventKey", "physical_keycode": 340}
-	])
-	InputManager.register_custom_action("crouch", InputManager.ACTION_TYPE_BUTTON, 0.5, [
-		{"type": "InputEventKey", "physical_keycode": 341}
-	])
-	InputManager.register_custom_action("interact", InputManager.ACTION_TYPE_BUTTON, 0.5, [
-		{"type": "InputEventKey", "physical_keycode": 69},
-		{"type": "InputEventKey", "physical_keycode": 32},
-		{"type": "InputEventJoypadButton", "button_index": 0}
-	])
-
 func _physics_process(delta: float) -> void:
 	if _in_puzzle:
 		return
-	
+
+	# Read one-shot input every physics frame so touch taps cannot get stuck.
+	var interaction_pressed: bool = InputManager.is_interacting()
 	_handle_movement(delta)
 	_handle_stance(delta)
 	_update_camera(delta)
-	_check_interaction(delta)
+	_check_interaction(interaction_pressed)
 	move_and_slide()
+	# Keep our velocity in sync with slide/collision response.
+	_target_velocity = velocity
 
 func _handle_movement(delta: float) -> void:
-	var input_dir = InputManager.get_movement_vector()
-	var touch_input = InputManager.get_touch_move_vector()
-	
-	# Touch input takes priority when active (non-zero)
-	var final_input = touch_input if touch_input.length() > 0 else input_dir
-	
-	if final_input.length() > 0:
+	var input_dir: Vector2 = InputManager.get_movement_vector()
+	var touch_input: Vector2 = InputManager.get_touch_move_vector()
+
+	# Touch stick takes priority while it is being pushed.
+	var final_input: Vector2 = touch_input if touch_input.length() > 0.05 else input_dir
+	if final_input.length() > 1.0:
 		final_input = final_input.normalized()
-	
-	var current_speed = walk_speed
-	var is_sprint = InputManager.is_sprinting() or InputManager.is_touch_sprinting()
-	var is_crouch = InputManager.is_crouching() or InputManager.is_touch_crouching()
-	
+
+	var current_speed: float = walk_speed
+	var is_sprint: bool = InputManager.is_sprinting() or InputManager.is_touch_sprinting()
+	var is_crouch: bool = _is_crouching
 	if is_sprint and not is_crouch:
 		current_speed = sprint_speed
 	elif is_crouch:
 		current_speed = crouch_speed
-	
-	var target_speed = final_input * current_speed
-	
-	if is_on_floor():
-		_target_velocity.x = lerp(_target_velocity.x, target_speed.x, acceleration * delta)
-		_target_velocity.z = lerp(_target_velocity.z, target_speed.z, acceleration * delta)
-	else:
-		_target_velocity.x = lerp(_target_velocity.x, target_speed.x, air_acceleration * delta)
-		_target_velocity.z = lerp(_target_velocity.z, target_speed.z, air_acceleration * delta)
-	
+
+	var target_speed: Vector2 = final_input * current_speed
+	var has_input: bool = final_input.length_squared() > 0.001
+	var rate: float = acceleration if has_input else deceleration
 	if not is_on_floor():
+		rate = air_acceleration if has_input else air_deceleration
+	_target_velocity.x = move_toward(_target_velocity.x, target_speed.x, rate * delta)
+	_target_velocity.z = move_toward(_target_velocity.z, target_speed.y, rate * delta)
+
+	if is_on_floor():
+		if _target_velocity.y < 0.0:
+			_target_velocity.y = 0.0
+	else:
 		_target_velocity.y -= gravity * delta
-	
+
 	velocity = _target_velocity
 
 func _handle_stance(delta: float) -> void:
 	_is_sprinting = InputManager.is_sprinting() or InputManager.is_touch_sprinting()
-	
-	var was_crouching = _is_crouching
+
+	# Keyboard crouch toggles; the mobile crouch button keeps its own toggle state.
 	if InputManager.is_action_just_pressed("crouch"):
-		_is_crouching = not _is_crouching
-	
-	# Touch crouch is toggle-based, sync with touch button state
-	var touch_crouch = InputManager.is_touch_crouching()
-	if touch_crouch != _is_crouching:
-		_is_crouching = touch_crouch
-	
-	var target_height = crouch_height if _is_crouching else standing_height
-	
+		_keyboard_crouching = not _keyboard_crouching
+	_is_crouching = _keyboard_crouching or InputManager.is_touch_crouching()
+
+	var target_height: float = crouch_height if _is_crouching else standing_height
 	if _capsule_shape:
-		var height_diff = _capsule_shape.height - target_height
-		_capsule_shape.height = target_height
-		
-		if _is_crouching and not was_crouching:
+		var height_diff: float = _capsule_shape.height - target_height
+		if not is_zero_approx(height_diff):
+			_capsule_shape.height = target_height
+			# Move the capsule centre by half the height change so its feet stay planted.
 			position.y -= height_diff * 0.5
-		elif not _is_crouching and was_crouching:
-			position.y += height_diff * 0.5
-	
-	var scale_target = target_height / _mesh_height
-	var mesh_scale = mesh.scale
+
+	var scale_target: float = target_height / _mesh_height
+	var mesh_scale: Vector3 = mesh.scale
 	mesh_scale.y = lerp(mesh_scale.y, scale_target, stance_change_speed * delta)
 	mesh.scale = mesh_scale
+	mesh.position.y = target_height * 0.5
 
 func _update_camera(delta: float) -> void:
-	_target_camera_pos = global_position + Vector3(0, camera_height, 0)
+	_target_camera_pos = global_position + Vector3(0, camera_height, camera_distance)
 	camera_pivot.global_position = camera_pivot.global_position.lerp(_target_camera_pos, camera_smooth_speed * delta)
 
-func _check_interaction(delta: float) -> void:
-	_interaction_timer += delta
-	if _interaction_timer < interaction_check_interval:
-		return
-	_interaction_timer = 0.0
-	
-	if _in_puzzle:
-		return
-	
-	# Raycast forward to find interactables
-	var from = camera.global_position
-	var to = from + -camera.global_transform.basis.z * interaction_range
-	
-	var space_state = get_world_3d().direct_space_state
-	var query = PhysicsRayQueryParameters3D.create(from, to)
-	query.collision_mask = 1
-	query.exclude = [get_instance_id()]
-	
-	var result = space_state.intersect_ray(query)
-	
-	if result:
-		var collider = result.get_collider()
-		if collider and collider.is_in_group("hackable"):
-			_current_interactable = collider
-			if collider.has_method("get_player_in_range") and not collider.get_player_in_range():
-				collider.call("try_start_hack")
-			_try_interact(collider)
-			return
-	
-	_current_interactable = null
+func _check_interaction(interaction_pressed: bool) -> void:
+	# Terminal InteractionArea nodes own range detection. Avoid a short camera ray
+	# that starts above the player's head and misses the terminal entirely.
+	var nearest: Node3D = null
+	var nearest_distance_sq: float = interaction_range * interaction_range
+	for candidate in get_tree().get_nodes_in_group("hackable"):
+		if not is_instance_valid(candidate) or not (candidate is Node3D):
+			continue
+		var interactable: Node3D = candidate as Node3D
+		if not interactable.has_method("get_player_in_range"):
+			continue
+		if not bool(interactable.call("get_player_in_range")):
+			continue
+		var distance_sq: float = global_position.distance_squared_to(interactable.global_position)
+		if distance_sq <= nearest_distance_sq:
+			nearest_distance_sq = distance_sq
+			nearest = interactable
+
+	if nearest != _current_interactable:
+		_current_interactable = nearest
+		if _current_interactable:
+			interaction_available.emit(_current_interactable)
+		else:
+			interaction_unavailable.emit()
+
+	if interaction_pressed and is_instance_valid(_current_interactable):
+		_try_interact(_current_interactable)
 
 func _try_interact(interactable: Node3D) -> void:
-	if InputManager.is_interacting():
-		if interactable.has_method("try_start_hack"):
-			var success = interactable.try_start_hack()
-			if success:
-				_enter_puzzle(interactable)
+	if _in_puzzle or not is_instance_valid(interactable):
+		return
+	if interactable.has_method("try_start_hack") and bool(interactable.call("try_start_hack")):
+		_enter_puzzle(interactable)
 
 func _enter_puzzle(terminal: Node3D) -> void:
 	if _in_puzzle:
 		return
-	
 	_in_puzzle = true
-	
+
 	if _hacking_puzzle and _hacking_puzzle.has_method("start_puzzle"):
-		_hacking_puzzle.start_puzzle(terminal)
-		_hacking_puzzle.puzzle_completed.connect(_on_puzzle_completed)
-	
-	# Disable player movement during puzzle
+		if _hacking_puzzle.has_signal("puzzle_completed") and not _hacking_puzzle.is_connected("puzzle_completed", _on_puzzle_completed):
+			_hacking_puzzle.connect("puzzle_completed", _on_puzzle_completed)
+		_hacking_puzzle.call("start_puzzle", terminal)
+	else:
+		_in_puzzle = false
+		push_warning("Hacking puzzle is unavailable; player controls were not locked.")
+
+	# Disable player movement during puzzle.
 	set_process(false)
 	set_physics_process(false)
 	set_process_input(false)
+	set_process_unhandled_input(false)
 
 func _on_puzzle_completed(success: bool) -> void:
 	_in_puzzle = false
-	
-	# Re-enable player
 	set_process(true)
 	set_physics_process(true)
 	set_process_input(true)
-	
-	if _hacking_puzzle:
-		_hacking_puzzle.puzzle_completed.disconnect(_on_puzzle_completed)
-	
+	set_process_unhandled_input(true)
+
+	if _hacking_puzzle and _hacking_puzzle.has_signal("puzzle_completed") and _hacking_puzzle.is_connected("puzzle_completed", _on_puzzle_completed):
+		_hacking_puzzle.disconnect("puzzle_completed", _on_puzzle_completed)
+
 	if success:
 		print("Hack successful!")
 	else:
 		print("Hack failed!")
-
-func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and event.physical_keycode == KEY_ESCAPE:
-		get_tree().paused = not get_tree().paused
