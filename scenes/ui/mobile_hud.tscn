@@ -183,7 +183,9 @@ mouse_filter = 0
 
 [node name="SprintButton" type="Button" parent="ButtonContainer" script=ExtResource("2")]
 action_name = "sprint"
+toggle_mode = true
 theme_override_styles/normal = SubResource("5")
+theme_override_styles/pressed = SubResource("4")
 text = "SPRINT"
 theme_override_font_sizes/font_size = 14
 theme_override_colors/font_color = Color(1, 1, 1, 1)
