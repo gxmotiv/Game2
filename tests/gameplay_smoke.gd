@@ -151,7 +151,18 @@ func _run_gameplay_smoke_test() -> void:
 	print("GAMEPLAY CHECK OK: CROUCH and SPRINT buttons toggle correctly.")
 
 	# Pause should stop the game, show the overlay, and resume through the menu.
+	print("PAUSE_DIAGNOSTIC_BEFORE: action=", pause_button.get("action_name"),
+		" button_script=", pause_button.get_script().resource_path if pause_button.get_script() != null else "NULL",
+		" handler_connected=", pause_button.is_connected("pressed", Callable(pause_button, "_on_button_pressed")),
+		" pause_script=", pause_menu.get_script().resource_path if pause_menu.get_script() != null else "NULL",
+		" has_show=", pause_menu.has_method("show_menu"),
+		" has_hide=", pause_menu.has_method("hide_menu"),
+		" paused_before=", paused,
+		" visible_before=", pause_menu.get("visible"))
 	pause_button.emit_signal("pressed")
+	print("PAUSE_DIAGNOSTIC_AFTER: action=", pause_button.get("action_name"),
+		" paused_after=", paused,
+		" visible_after=", pause_menu.get("visible"))
 	if not paused or not bool(pause_menu.get("visible")):
 		_fail("PAUSE button did not pause the tree and show the pause menu.")
 		return
