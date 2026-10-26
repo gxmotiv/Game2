@@ -1,6 +1,25 @@
 extends Node
 
 func _ready() -> void:
+	# Explicitly start with all modal overlays closed. This is a safety net in
+	# addition to each overlay's own _ready() setup, and prevents a visible
+	# pause/puzzle layer from covering the gameplay on first launch.
+	var hacking_overlay := get_node_or_null("HackingPuzzle")
+	if hacking_overlay:
+		hacking_overlay.hide()
+	var pause_overlay := get_node_or_null("PauseMenu")
+	if pause_overlay and pause_overlay.has_method("hide_menu"):
+		pause_overlay.call("hide_menu")
+	elif pause_overlay:
+		pause_overlay.hide()
+
+	if hacking_overlay and hacking_overlay.visible:
+		push_error("STARTUP CHECK FAILED: hacking puzzle overlay is visible at launch.")
+	if pause_overlay and pause_overlay.visible:
+		push_error("STARTUP CHECK FAILED: pause menu is visible at launch.")
+	else:
+		print("STARTUP CHECK OK: startup overlays are hidden.")
+
 	var terminal := get_node_or_null("Terminal")
 	var world := get_node_or_null("World")
 	if terminal == null or world == null:
