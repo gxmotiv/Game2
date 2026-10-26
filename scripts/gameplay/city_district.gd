@@ -118,7 +118,7 @@ func _create_security_light(device_name: String, position: Vector3) -> Node3D:
 	lamp.name = "SecurityLightOmni"
 	lamp.light_color = Color(1.0, 0.28, 0.12)
 	lamp.light_energy = 0.45
-	lamp.light_range = 5.5
+	lamp.omni_range = 5.5
 	lamp.shadow_enabled = false
 	device.add_child(lamp)
 	var lamp_mesh := MeshInstance3D.new()
