@@ -2,11 +2,17 @@ name: Build Android Debug APK
 
 on:
   push:
-    branches: [kilo/airy-chime-uvv]
+    branches: [kilo/airy-chime-uvv, fix/veil-circuit-runtime]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: veil-circuit-android-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   GODOT_VERSION: "4.3.stable"
@@ -43,10 +49,29 @@ jobs:
           ls -la project.godot export_presets.cfg
           ls -la assets/textures/icon.png
 
-      - name: Install system dependencies
+      - name: Verify system dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y unzip wget curl libfontconfig1 libx11-6 libxext6 libxrender1 libxi6 libxtst6 libgl1
+          set -euo pipefail
+          # GitHub's ubuntu-latest image normally includes these. Avoid a full
+          # apt-get update on every build; install only if the runner is missing
+          # a required command/library.
+          missing=0
+          for cmd in unzip wget curl xvfb-run; do
+            if ! command -v "$cmd" >/dev/null 2>&1; then
+              echo "Missing command: $cmd"
+              missing=1
+            fi
+          done
+          for lib in libfontconfig.so.1 libX11.so.6 libXext.so.6 libXrender.so.1 libXi.so.6 libXtst.so.6 libGL.so.1; do
+            if ! ldconfig -p | grep -Fq "$lib"; then
+              echo "Missing library: $lib"
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            sudo apt-get update
+            sudo apt-get install -y unzip wget curl libfontconfig1 libx11-6 libxext6 libxrender1 libxi6 libxtst6 libgl1 libgl1-mesa-dri xvfb
+          fi
 
       - name: Download and install Android SDK
         run: |
@@ -124,6 +149,12 @@ jobs:
         run: |
           cat $HOME/.config/godot/editor_settings-4.tres
 
+      - name: Restore stable Android debug keystore
+        uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: veil-circuit-debug-keystore-v1-${{ runner.os }}
+
       - name: Prepare Android debug signing
         run: |
           mkdir -p "$HOME/.android"
@@ -143,13 +174,51 @@ jobs:
           test -f "$JAVA_HOME/bin/java"
           test -f "$HOME/.android/debug.keystore"
 
+      - name: Validate Godot project and render a boot frame
+        run: |
+          set -euo pipefail
+          export LIBGL_ALWAYS_SOFTWARE=1
+          ERROR_PATTERN='SCRIPT ERROR:|Parse Error|Cannot get class|Parent path .* vanished|ERROR: Failed loading|Invalid assignment of property|_create_mesh_array|NULL MESH INSTANCE|NO ACTIVE 3D CAMERA|PLAYER GROUP MISSING|STARTUP CHECK FAILED|Failed to retrieve non-existent singleton|valid InputEvent object|Unable to convert array index 0 from "int" to "RID"|Parameter "m" is null'
+
+          xvfb-run -a -s "-screen 0 1280x720x24" godot --audio-driver Dummy --editor --path "$GITHUB_WORKSPACE" --quit 2>&1 | tee /tmp/godot-import.log
+          if grep -E "$ERROR_PATTERN" /tmp/godot-import.log; then
+            echo "ERROR: Godot editor import reported scene/resource/script errors."
+            exit 1
+          fi
+
+          xvfb-run -a -s "-screen 0 1280x720x24" sh -c '
+            set -eu
+            export LIBGL_ALWAYS_SOFTWARE=1
+            godot --audio-driver Dummy --path "$GITHUB_WORKSPACE" --quit-after 300 > /tmp/godot-boot.log 2>&1
+          '
+          cat /tmp/godot-boot.log
+          if grep -E "$ERROR_PATTERN" /tmp/godot-boot.log; then
+            echo "ERROR: Main-scene startup test found scene/resource/script errors."
+            exit 1
+          fi
+          grep -q "STARTUP CHECK OK: active gameplay camera found." /tmp/godot-boot.log
+          grep -q "STARTUP CHECK OK: mobile controls found." /tmp/godot-boot.log
+
+      - name: Test movement and terminal hacking
+        run: |
+          set -euo pipefail
+          godot --audio-driver Dummy --headless --path "$GITHUB_WORKSPACE" --script res://tests/gameplay_smoke.gd 2>&1 | tee /tmp/godot-gameplay-test.log
+          grep -q "GAMEPLAY SMOKE TEST PASSED." /tmp/godot-gameplay-test.log
+
       - name: Build Android Debug APK
         run: |
           set -e
+          # Use a monotonic version code so later APKs can update earlier debug installs.
+          sed -i "0,/^version\/code=.*/s//version\/code=${GITHUB_RUN_NUMBER}/" export_presets.cfg
           mkdir -p build/android
           export ANDROID_HOME="$HOME/android-sdk"
           export ANDROID_SDK_ROOT="$HOME/android-sdk"
-          godot --headless --verbose --path "$GITHUB_WORKSPACE" --export-debug "Android Debug" build/android/veil_circuit_debug.apk 2>&1
+          set -o pipefail
+          godot --headless --verbose --path "$GITHUB_WORKSPACE" --export-debug "Android Debug" build/android/veil_circuit_debug.apk 2>&1 | tee /tmp/godot-export.log
+          if grep -E "SCRIPT ERROR:|Parse Error|Cannot get class|Parent path .* vanished|ERROR: Failed loading|Invalid assignment of property|_create_mesh_array|NULL MESH INSTANCE|Failed to retrieve non-existent singleton|valid InputEvent object|No loader found for resource|SHADER ERROR|Shader compilation failed" /tmp/godot-export.log; then
+            echo "ERROR: Godot export reported scene, resource, or script errors."
+            exit 1
+          fi
           if [ ! -f build/android/veil_circuit_debug.apk ]; then
             echo "ERROR: APK not created. Godot export failed."
             exit 1
