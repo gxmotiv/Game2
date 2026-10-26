@@ -175,7 +175,7 @@ func _has_line_of_sight(from: Vector3, to: Vector3) -> bool:
 	# possibly-invalid physics-space RID at startup.
 	var space_state: PhysicsDirectSpaceState3D = null
 	for guard_id in _guard_data:
-		var guard_node = _guard_data[guard_id].get("node") as Node3D
+		var guard_node: Node3D = _guard_data[guard_id].get("node") as Node3D
 		if is_instance_valid(guard_node) and guard_node.is_inside_tree():
 			space_state = guard_node.get_world_3d().direct_space_state
 			break
