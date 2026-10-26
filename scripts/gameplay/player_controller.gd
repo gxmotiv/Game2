@@ -206,9 +206,9 @@ func _check_interaction(delta: float) -> void:
 	var objective_label: Node = get_tree().root.find_child("ObjectiveLabel", true, false)
 	if objective_label:
 		if is_instance_valid(_current_interactable):
-			objective_label.text = "TERMINAL IN RANGE  •  TAP INTERACT"
+			objective_label.text = "NETWORK NODE IN RANGE  •  TAP INTERACT"
 		else:
-			objective_label.text = "OBJECTIVE: REACH THE TERMINAL  •  DRAG RIGHT SIDE TO LOOK"
+			objective_label.text = "NOVA GRID: EXPLORE AND HACK • DRAG RIGHT SIDE TO LOOK"
 
 func _try_interact_from_hud() -> void:
 	# Called by a completed INTERACT tap. Refresh target selection immediately,
@@ -256,7 +256,7 @@ func _on_puzzle_completed(success: bool) -> void:
 	var objective_label := get_tree().root.find_child("ObjectiveLabel", true, false)
 	if objective_label:
 		if success:
-			objective_label.text = "MISSION COMPLETE  •  SYSTEM BREACHED"
+			objective_label.text = "NETWORK NODE COMPROMISED  •  EXPLORE THE DISTRICT"
 		else:
 			objective_label.text = "HACK FAILED  •  MOVE CLOSER AND TRY AGAIN"
 
