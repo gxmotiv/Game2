@@ -89,7 +89,7 @@ theme_override_font_sizes/font_size = 16
 theme_override_colors/font_color = Color(0.95, 0.98, 1.0, 1.0)
 theme_override_colors/font_outline_color = Color(0.0, 0.0, 0.0, 1.0)
 theme_override_constants/outline_size = 2
-text = "OBJECTIVE: REACH THE TERMINAL  •  DRAG RIGHT SIDE TO LOOK"
+text = "NOVA GRID: HACK NETWORK DEVICES • EXPLORE THE DISTRICT"
 mouse_filter = 2
 
 [node name="PauseButton" type="Button" parent="." script=ExtResource("2")]
