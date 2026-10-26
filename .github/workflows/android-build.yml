@@ -50,7 +50,7 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y unzip wget curl libfontconfig1 libx11-6 libxext6 libxrender1 libxi6 libxtst6 libgl1
+          sudo apt-get install -y unzip wget curl libfontconfig1 libx11-6 libxext6 libxrender1 libxi6 libxtst6 libgl1 libgl1-mesa-dri xvfb imagemagick
 
       - name: Download and install Android SDK
         run: |
@@ -147,19 +147,43 @@ jobs:
           test -f "$JAVA_HOME/bin/java"
           test -f "$HOME/.android/debug.keystore"
 
-      - name: Validate Godot project and boot scene
+      - name: Validate Godot project and render a boot frame
         run: |
-          set -o pipefail
-          godot --headless --editor --path "$GITHUB_WORKSPACE" --quit 2>&1 | tee /tmp/godot-import.log
-          if grep -E "SCRIPT ERROR:|Parse Error|Cannot get class|Parent path .* vanished|ERROR: Failed loading|Invalid assignment of property|_create_mesh_array|NULL MESH INSTANCE|Failed to retrieve non-existent singleton|valid InputEvent object" /tmp/godot-import.log; then
-            echo "ERROR: Godot editor import reported scene or script errors."
+          set -euo pipefail
+          export LIBGL_ALWAYS_SOFTWARE=1
+          ERROR_PATTERN='SCRIPT ERROR:|Parse Error|Cannot get class|Parent path .* vanished|ERROR: Failed loading|Invalid assignment of property|_create_mesh_array|NULL MESH INSTANCE|NO ACTIVE 3D CAMERA|PLAYER GROUP MISSING|Failed to retrieve non-existent singleton|valid InputEvent object|Unable to convert array index 0 from "int" to "RID"|Parameter "m" is null'
+
+          xvfb-run -a -s "-screen 0 1280x720x24" godot --audio-driver Dummy --editor --path "$GITHUB_WORKSPACE" --quit 2>&1 | tee /tmp/godot-import.log
+          if grep -E "$ERROR_PATTERN" /tmp/godot-import.log; then
+            echo "ERROR: Godot editor import reported scene/resource/script errors."
             exit 1
           fi
-          godot --headless --path "$GITHUB_WORKSPACE" --quit-after 5 2>&1 | tee /tmp/godot-boot.log
-          if grep -E "SCRIPT ERROR:|Parse Error|Cannot get class|Parent path .* vanished|ERROR: Failed loading|Invalid assignment of property|_create_mesh_array|NULL MESH INSTANCE|Failed to retrieve non-existent singleton|valid InputEvent object" /tmp/godot-boot.log; then
-            echo "ERROR: Main scene boot test found script or scene loading errors."
+
+          mkdir -p build/android
+          xvfb-run -a -s "-screen 0 1280x720x24" sh -c '
+            set -eu
+            export LIBGL_ALWAYS_SOFTWARE=1
+            godot --audio-driver Dummy --path "$GITHUB_WORKSPACE" --quit-after 180 > /tmp/godot-boot.log 2>&1 &
+            game_pid=$!
+            sleep 3
+            import -window root "$GITHUB_WORKSPACE/build/android/veil_circuit_boot.png"
+            wait "$game_pid"
+          '
+          cat /tmp/godot-boot.log
+          if grep -E "$ERROR_PATTERN" /tmp/godot-boot.log; then
+            echo "ERROR: Rendered main-scene smoke test found startup errors."
             exit 1
           fi
+          test -s build/android/veil_circuit_boot.png
+
+      - name: Upload boot screenshot for review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: veil-circuit-boot-screenshot
+          path: build/android/veil_circuit_boot.png
+          retention-days: 7
+          if-no-files-found: ignore
 
       - name: Build Android Debug APK
         run: |
