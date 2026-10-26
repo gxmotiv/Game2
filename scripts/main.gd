@@ -58,5 +58,14 @@ func _ready() -> void:
 	else:
 		print("STARTUP CHECK OK: mobile controls found.")
 
-	if get_node_or_null("PauseMenu") == null:
+	var pause_menu := get_node_or_null("PauseMenu")
+	if pause_menu == null:
 		push_error("STARTUP CHECK FAILED: pause menu is missing.")
+	elif pause_menu.visible:
+		push_error("STARTUP CHECK FAILED: pause menu should be hidden on launch.")
+
+	var hacking_puzzle := get_node_or_null("HackingPuzzle")
+	if hacking_puzzle == null:
+		push_error("STARTUP CHECK FAILED: hacking puzzle overlay is missing.")
+	elif hacking_puzzle.visible:
+		push_error("STARTUP CHECK FAILED: hacking puzzle should be hidden on launch.")
