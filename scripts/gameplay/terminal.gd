@@ -39,8 +39,8 @@ func _ready() -> void:
 	if status_light and status_light.material_override:
 		_original_light_color = status_light.material_override.albedo_color
 		# Set initial emission color (green for active terminal)
-		status_light.material_override.emission_color = Color(0.2, 0.8, 0.4, 1.0)
-		_original_emission = status_light.material_override.emission_color
+		status_light.material_override.emission = Color(0.2, 0.8, 0.4, 1.0)
+		_original_emission = status_light.material_override.emission
 	
 	if status_light_glow:
 		status_light_glow.light_color = Color(1.0, 0.3, 0.1, 1.0)
@@ -106,7 +106,7 @@ func _on_hack_success() -> void:
 	# Change status light to green
 	if status_light and status_light.material_override:
 		status_light.material_override.albedo_color = Color(0.2, 1.0, 0.2, 1.0)
-		status_light.material_override.emission_color = Color(0.2, 1.0, 0.2, 1.0)
+		status_light.material_override.emission = Color(0.2, 1.0, 0.2, 1.0)
 	
 	if status_light_glow:
 		status_light_glow.light_color = Color(0.2, 1.0, 0.2, 1.0)
@@ -120,9 +120,9 @@ func _on_hack_failure() -> void:
 	if status_light and status_light.material_override:
 		var tween = create_tween()
 		tween.tween_property(status_light.material_override, "albedo_color", Color(1.0, 0.2, 0.2, 1.0), 0.1)
-		tween.tween_property(status_light.material_override, "emission_color", Color(1.0, 0.2, 0.2, 1.0), 0.1)
+		tween.tween_property(status_light.material_override, "emission", Color(1.0, 0.2, 0.2, 1.0), 0.1)
 		tween.tween_property(status_light.material_override, "albedo_color", Color(1.0, 0.3, 0.1, 1.0), 0.3)
-		tween.tween_property(status_light.material_override, "emission_color", Color(1.0, 0.3, 0.1, 1.0), 0.3)
+		tween.tween_property(status_light.material_override, "emission", Color(1.0, 0.3, 0.1, 1.0), 0.3)
 
 func is_hacked() -> bool:
 	return _is_hacked
@@ -140,7 +140,7 @@ func reset_terminal() -> void:
 	
 	if status_light and status_light.material_override:
 		status_light.material_override.albedo_color = _original_light_color
-		status_light.material_override.emission_color = _original_emission
+		status_light.material_override.emission = _original_emission
 	
 	if status_light_glow:
 		status_light_glow.light_color = Color(1.0, 0.3, 0.1, 1.0)

@@ -8,6 +8,8 @@ class_name PauseMenu
 @onready var panel = $PanelContainer
 
 func _ready() -> void:
+	# Keep the menu interactive while the rest of the game tree is paused.
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	visible = false
 	
 	resume_button.pressed.connect(_on_resume_pressed)

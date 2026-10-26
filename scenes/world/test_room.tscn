@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://scripts/gameplay/security_light.gd" id="1"]
 
@@ -84,7 +84,6 @@ position = Vector3(0, 0.0, 0.5)
 
 [node name="WallEast" type="StaticBody3D" parent="."]
 position = Vector3(10.0, 4.5, 0)
-rotation = Vector3(0, 1.5708, 0)
 
 [node name="WallEastCollision" type="CollisionShape3D" parent="WallEast"]
 shape = SubResource("4")
@@ -92,11 +91,9 @@ shape = SubResource("4")
 [node name="WallEastMesh" type="MeshInstance3D" parent="WallEast"]
 mesh = SubResource("7")
 material_override = SubResource("9")
-position = Vector3(0, 0.0, 0.5)
 
 [node name="WallWest" type="StaticBody3D" parent="."]
 position = Vector3(-10.0, 4.5, 0)
-rotation = Vector3(0, -1.5708, 0)
 
 [node name="WallWestCollision" type="CollisionShape3D" parent="WallWest"]
 shape = SubResource("4")
@@ -104,7 +101,6 @@ shape = SubResource("4")
 [node name="WallWestMesh" type="MeshInstance3D" parent="WallWest"]
 mesh = SubResource("7")
 material_override = SubResource("9")
-position = Vector3(0, 0.0, 0.5)
 
 [node name="Ceiling" type="StaticBody3D" parent="."]
 position = Vector3(0, 10.0, 0)
@@ -127,6 +123,10 @@ rotation = Vector3(-0.785398, 0.785398, 0)
 [node name="SecurityLight" type="Node3D" parent="."]
 script = ExtResource("1")
 position = Vector3(6.0, 8.5, 0.0)
+light_node = NodePath("SecurityLightOmni")
+light_mesh = NodePath("SecurityLightMesh")
+light_mesh = NodePath("SecurityLightMesh")
+light_node = NodePath("SecurityLightOmni")
 
 [node name="SecurityLightMesh" type="MeshInstance3D" parent="SecurityLight"]
 mesh = SubResource("14")

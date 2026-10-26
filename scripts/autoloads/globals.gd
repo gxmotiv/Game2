@@ -49,7 +49,7 @@ enum GameDifficulty {
 }
 
 const GAME_VERSION: String = "0.1.0"
-const TARGET_FPS: int = 30
+const TARGET_FPS: int = 60
 const MAX_SUSPICION: float = 100.0
 const SUSPICION_DECAY_RATE: float = 5.0
 const SUSPICION_RISE_RATE: float = 15.0
@@ -74,6 +74,7 @@ var inverted_camera_y: bool = false
 var camera_sensitivity: float = 1.0
 
 func _ready() -> void:
+	Engine.max_fps = TARGET_FPS
 	_load_settings()
 	call_deferred("_apply_volumes_deferred")
 
