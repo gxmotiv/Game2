@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/world/test_room.tscn" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/player/player.tscn" id="2"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" path="res://scenes/gameplay/terminal/terminal.tscn" id="5"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hacking_puzzle.tscn" id="6"]
 [ext_resource type="Script" path="res://scripts/main.gd" id="7"]
+[ext_resource type="PackedScene" path="res://scenes/ui/pause_menu.tscn" id="8"]
 
 [node name="Main" type="Node" scene_instance_id=1]
 script = ExtResource("7")
@@ -17,13 +18,14 @@ script = ExtResource("7")
 position = Vector3(0, 1.0, 0)
 
 [node name="Guard" parent="." instance=ExtResource("4")]
-position = Vector3(0, 1.0, -5.0)
+position = Vector3(-5.0, 1.0, -5.0)
 
 [node name="Terminal" parent="." instance=ExtResource("5")]
-position = Vector3(-6.0, 1.0, 6.0)
+position = Vector3(0.0, 1.0, -6.0)
 
 [node name="MobileHUD" parent="." instance=ExtResource("3")]
 
 [node name="HackingPuzzle" parent="." instance=ExtResource("6")]
 
 [node name="Systems" type="Node" parent="."]
+[node name="PauseMenu" parent="." instance=ExtResource("8")]
