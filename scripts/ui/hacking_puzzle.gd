@@ -310,10 +310,11 @@ func _create_node_texture(node_type: int, rotation: int) -> ImageTexture:
 	return tex
 
 func _get_rotated_connections(node_type: int, rotation: int) -> Array[int]:
-	var base = CONNECTIONS[node_type] if CONNECTIONS.has(node_type) else []
-	var result = []
-	for dir in base:
-		var rotated = (dir + rotation) % 4
+	var base: Array = CONNECTIONS[node_type] if CONNECTIONS.has(node_type) else []
+	var result: Array[int] = []
+	for direction_value in base:
+		var direction: int = int(direction_value)
+		var rotated: int = (direction + rotation) % 4
 		result.append(rotated)
 	return result
 
