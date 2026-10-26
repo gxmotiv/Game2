@@ -23,7 +23,7 @@ func update_timer(seconds: float) -> void:
 	if timer_label:
 		timer_label.text = "%ds" % int(ceil(seconds))
 		if seconds <= 10.0:
-			timer_label.custom_colors.font_color = Color(1.0, 0.3, 0.3, 1.0)
+			timer_label.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3, 1.0))
 
 func set_hints_remaining(count: int) -> void:
 	if hint_button:
