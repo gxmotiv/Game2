@@ -125,6 +125,14 @@ character. The Compatibility renderer and 30 FPS target remain in place. Real-de
 frame rate, heat, memory use, and long-session stability must still be measured on
 the target Android phone before making performance guarantees.
 
+## Batched City Facade Details
+
+The procedural district adds dark reflective windows, a restrained mix of cyan-lit
+windows, and rooftop HVAC units. These details are generated from low-poly boxes and
+shared through three MultiMesh batches, rather than creating a separate scene node
+for every window or roof unit. The city keeps its deterministic seed and does not
+download textures or models at runtime.
+
 ## Development Phases
 
 1. **Phase 0:** Project bootstrap
