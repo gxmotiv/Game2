@@ -119,6 +119,11 @@ func _run_gameplay_smoke_test() -> void:
 	crouch_button.set_pressed_no_signal(true)
 	crouch_button.emit_signal("toggled", true)
 	await physics_frame
+	print("BUTTON_DIAGNOSTIC: crouch_input=", input_manager.call("is_touch_crouching"),
+		" player_crouching=", player.get("_is_crouching"),
+		" last_touch_crouch=", player.get("_last_touch_crouch"),
+		" button_script=", crouch_button.get_script().resource_path if crouch_button.get_script() != null else "NULL",
+		" signal_connected=", crouch_button.is_connected("toggled", Callable(crouch_button.get_script() == null ? null : crouch_button, "_on_toggled")))
 	if not bool(input_manager.call("is_touch_crouching")) or not bool(player.get("_is_crouching")):
 		_fail("CROUCH button did not activate crouch.")
 		return
