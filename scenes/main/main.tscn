@@ -1,6 +1,6 @@
 [gd_scene load_steps=9 format=3]
 
-[ext_resource type="PackedScene" path="res://scenes/world/test_room.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/world/city_district.tscn" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/player/player.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/ui/mobile_hud.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/guard/guard.tscn" id="4"]
