@@ -2,7 +2,7 @@ name: Build Android Debug APK
 
 on:
   push:
-    branches: [kilo/airy-chime-uvv, fix/veil-circuit-runtime]
+    branches: [kilo/airy-chime-uvv, fix/veil-circuit-runtime, feature/open-city-district]
   pull_request:
     branches: [main]
   workflow_dispatch:
