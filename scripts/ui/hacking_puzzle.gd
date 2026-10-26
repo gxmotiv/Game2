@@ -75,6 +75,9 @@ var _hints_remaining: int = 0
 var _puzzle_active: bool = false
 var _terminal: Node
 var _solution_shown: bool = false
+# Cache one base texture per pipe type. Rebuilding pixel textures on every tap caused
+# visible input lag on low-end Android devices.
+var _texture_cache: Dictionary = {}
 
 func _ready() -> void:
 	# Keep the hacking overlay hidden until the player interacts with a terminal.
@@ -94,7 +97,10 @@ func _ready() -> void:
 	for i in range(grid_container.get_child_count()):
 		var btn = grid_container.get_child(i)
 		if btn is TextureButton:
-			btn.gui_input.connect(_on_node_gui_input.bind(i))
+			# Button.pressed handles both Android touch and desktop clicks reliably.
+			# STOP prevents the grid/container from competing for the same tap.
+			btn.mouse_filter = Control.MOUSE_FILTER_STOP
+			btn.pressed.connect(_on_node_pressed.bind(i))
 	
 	hint_button.pressed.connect(_on_hint_pressed)
 	exit_button.pressed.connect(_on_exit_pressed)
@@ -209,14 +215,10 @@ func _process(delta: float) -> void:
 	if _time_remaining <= 0.0:
 		_fail_puzzle()
 
-func _on_node_gui_input(event: InputEvent, index: int) -> void:
+func _on_node_pressed(index: int) -> void:
 	if not _puzzle_active or _solution_shown:
 		return
-	
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		_rotate_node(index)
-	elif event is InputEventScreenTouch and event.pressed:
-		_rotate_node(index)
+	_rotate_node(index)
 
 func _rotate_node(index: int) -> void:
 	if _nodes[index] in [NodeType.START, NodeType.END, NodeType.EMPTY]:
@@ -237,9 +239,13 @@ func _update_button_visual(index: int) -> void:
 	if not btn:
 		return
 	
-	# Create texture based on node type and rotation
-	var texture = _create_node_texture(node_type, rotation)
-	btn.texture_normal = texture
+	# Generate each node type once, then rotate the Control itself. The old code
+	# redrew ~64x64 pixels plus every pipe stroke on every tap, making clicks feel
+	# delayed on low-end phones.
+	if not _texture_cache.has(node_type):
+		_texture_cache[node_type] = _create_node_texture(node_type, 0)
+	btn.texture_normal = _texture_cache[node_type]
+	btn.rotation = float(rotation) * PI * 0.5
 
 func _create_node_texture(node_type: int, rotation: int) -> ImageTexture:
 	var size = 64
