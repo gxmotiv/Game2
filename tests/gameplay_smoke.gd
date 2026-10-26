@@ -48,7 +48,7 @@ func _run_gameplay_smoke_test() -> void:
 	if not world.is_in_group("open_world"):
 		_fail("The main scene did not load the procedural open-city district.")
 		return
-	var city_nodes: Array[Node] = get_tree().get_nodes_in_group("hackable")
+	var city_nodes: Array[Node] = get_nodes_in_group("hackable")
 	if city_nodes.size() < 13:
 		_fail("Expected at least 13 hackable terminals/network devices in the district, found %d." % city_nodes.size())
 		return
