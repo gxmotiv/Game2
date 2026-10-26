@@ -12,7 +12,7 @@ class_name Player
 @export_group("Camera")
 @export var camera_distance: float = 7.0
 @export var camera_height: float = 3.4
-@export var camera_angle: float = 25.0
+@export var camera_angle: float = 12.0
 @export var camera_smooth_speed: float = 12.0
 @export var look_sensitivity: float = 0.004
 
@@ -137,6 +137,7 @@ func _handle_stance(delta: float) -> void:
 	var mesh_scale: Vector3 = mesh.scale
 	mesh_scale.y = lerp(mesh_scale.y, scale_target, stance_change_speed * delta)
 	mesh.scale = mesh_scale
+	mesh.position.y = target_height * 0.5
 
 func _update_camera(delta: float) -> void:
 	var behind_player := Vector3(0.0, 0.0, camera_distance).rotated(Vector3.UP, camera_pivot.global_rotation.y)
