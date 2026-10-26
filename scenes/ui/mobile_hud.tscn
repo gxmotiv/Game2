@@ -131,7 +131,7 @@ offset_top = -80.0
 offset_right = 80.0
 offset_bottom = 80.0
 
-[node name="Base" type="Control" parent="JoystickContainer/VirtualJoystick"]
+[node name="Base" type="Panel" parent="JoystickContainer/VirtualJoystick"]
 layout_mode = 3
 anchors_preset = 5
 anchor_left = 0.5
@@ -145,7 +145,7 @@ offset_bottom = 60.0
 theme_override_styles/panel = SubResource("3")
 mouse_filter = 2
 
-[node name="Stick" type="Control" parent="JoystickContainer/VirtualJoystick"]
+[node name="Stick" type="Panel" parent="JoystickContainer/VirtualJoystick"]
 layout_mode = 3
 anchors_preset = 5
 anchor_left = 0.5
