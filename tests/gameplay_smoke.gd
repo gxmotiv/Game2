@@ -230,7 +230,8 @@ func _run_gameplay_smoke_test() -> void:
 		_fail("Hacking puzzle did not pre-cache its node textures.")
 		return
 	var cache_grid_size: int = int(puzzle.get("grid_size"))
-	var cache_route_row: int = int((puzzle.get("_start_pos") as Vector2i).y)
+	var cache_start_position: Vector2i = puzzle.get("_start_pos")
+	var cache_route_row: int = cache_start_position.y
 	var cache_rotations: Array = puzzle.get("_node_rotations")
 	var candidate_indices: Array[int] = [cache_route_row * cache_grid_size + 1, cache_route_row * cache_grid_size + 2]
 	var tap_index: int = candidate_indices[0]
