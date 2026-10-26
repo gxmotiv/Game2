@@ -1,5 +1,4 @@
 extends Node
-class_name MainScene
 
 func _ready() -> void:
 	# Keep only the controller and mobile HUD alive while paused, so Pause can resume.
