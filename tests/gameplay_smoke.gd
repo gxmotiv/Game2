@@ -40,9 +40,19 @@ func _run_gameplay_smoke_test() -> void:
 	var puzzle: CanvasLayer = game.get_node_or_null("HackingPuzzle") as CanvasLayer
 	var input_manager: Node = root.get_node_or_null("InputManager")
 	var mobile_hud: Node = game.get_node_or_null("MobileHUD")
-	if player == null or terminal == null or guard == null or puzzle == null or input_manager == null or mobile_hud == null:
+	var world: Node = game.get_node_or_null("World")
+	if player == null or terminal == null or guard == null or puzzle == null or input_manager == null or mobile_hud == null or world == null:
 		_fail("Main scene is missing Player, Terminal, Guard, HackingPuzzle, InputManager, or MobileHUD.")
 		return
+
+	if not world.is_in_group("open_world"):
+		_fail("The main scene did not load the procedural open-city district.")
+		return
+	var city_nodes: Array[Node] = get_tree().get_nodes_in_group("hackable")
+	if city_nodes.size() < 13:
+		_fail("Expected at least 13 hackable terminals/network devices in the district, found %d." % city_nodes.size())
+		return
+	print("GAMEPLAY CHECK OK: open-city district loaded with %d hackable network nodes." % city_nodes.size())
 
 	var joystick: Control = mobile_hud.get_node("JoystickContainer/VirtualJoystick") as Control
 	var joystick_script: Script = joystick.get_script() as Script
@@ -213,6 +223,30 @@ func _run_gameplay_smoke_test() -> void:
 		_fail("INTERACT button did not open the hacking puzzle.")
 		return
 	print("GAMEPLAY CHECK OK: INTERACT opens the hacking puzzle.")
+
+	# Confirm tap handling uses cached textures and rotates a node immediately.
+	var texture_cache: Dictionary = puzzle.get("_texture_cache")
+	if texture_cache.size() < 19:
+		_fail("Hacking puzzle did not pre-cache its node textures.")
+		return
+	var cache_grid_size: int = int(puzzle.get("grid_size"))
+	var cache_route_row: int = int((puzzle.get("_start_pos") as Vector2i).y)
+	var cache_rotations: Array = puzzle.get("_node_rotations")
+	var candidate_indices: Array[int] = [cache_route_row * cache_grid_size + 1, cache_route_row * cache_grid_size + 2]
+	var tap_index: int = candidate_indices[0]
+	for candidate_index in candidate_indices:
+		if int(cache_rotations[candidate_index]) % 2 == 1:
+			tap_index = candidate_index
+			break
+	var rotation_before_tap: int = int(cache_rotations[tap_index])
+	var tile_tap := InputEventScreenTouch.new()
+	tile_tap.pressed = true
+	puzzle.call("_on_node_gui_input", tile_tap, tap_index)
+	var rotations_after_tap: Array = puzzle.get("_node_rotations")
+	if int(rotations_after_tap[tap_index]) == rotation_before_tap:
+		_fail("A puzzle touch tap did not rotate its tile immediately.")
+		return
+	print("GAMEPLAY CHECK OK: circuit puzzle tap rotates immediately using cached textures.")
 
 	# Solve the generated straight route to validate end-to-end hacking.
 	var grid_size: int = int(puzzle.get("grid_size"))
