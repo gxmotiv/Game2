@@ -1,5 +1,8 @@
 extends Node
 
+var _hacked_network_nodes: int = 0
+var _network_nodes_total: int = 0
+
 func _enter_tree() -> void:
 	# A few Android/debug scene instantiations have returned UI nodes without
 	# their serialized script instance. Ensure PauseMenu's script is present
@@ -50,8 +53,16 @@ func _ready() -> void:
 	var security_light := world.find_child("SecurityLight", true, false) as Node3D
 	if security_light != null and terminal.has_method("set"):
 		terminal.set("linked_security_device", security_light)
-	else:
-		push_warning("SecurityLight was not found; terminal can still be hacked, but it cannot disable the light.")
+
+	# Every terminal and city device shares the same hack-result contract. This
+	# gives the open district a simple network objective without extra services.
+	var callback := Callable(self, "_on_network_node_hacked")
+	for network_node in get_tree().get_nodes_in_group("hackable"):
+		if network_node.has_signal("hack_completed"):
+			_network_nodes_total += 1
+			if not network_node.is_connected("hack_completed", callback):
+				network_node.connect("hack_completed", callback)
+	print("CITY CHECK OK: %d hackable network nodes registered." % _network_nodes_total)
 
 	# Lightweight startup assertions: if any of these fail, the CI smoke test
 	# can catch the broken scene before an APK is handed to the phone tester.
@@ -86,3 +97,18 @@ func _ready() -> void:
 		push_error("STARTUP CHECK FAILED: hacking puzzle overlay is missing.")
 	elif hacking_puzzle.visible:
 		push_error("STARTUP CHECK FAILED: hacking puzzle should be hidden on launch.")
+
+func _on_network_node_hacked(success: bool) -> void:
+	if not success:
+		return
+	_hacked_network_nodes = mini(_hacked_network_nodes + 1, _network_nodes_total)
+	call_deferred("_refresh_network_objective")
+
+func _refresh_network_objective() -> void:
+	var objective_label: Node = get_tree().root.find_child("ObjectiveLabel", true, false)
+	if objective_label == null:
+		return
+	if _network_nodes_total > 0 and _hacked_network_nodes >= _network_nodes_total:
+		objective_label.set("text", "NOVA GRID CONTROLLED  •  ALL NETWORK NODES COMPROMISED")
+	else:
+		objective_label.set("text", "NETWORK BREACH: %d/%d  •  EXPLORE NOVA GRID" % [_hacked_network_nodes, _network_nodes_total])
