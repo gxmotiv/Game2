@@ -20,9 +20,10 @@ func _run_gameplay_smoke_test() -> void:
 
 	var player: CharacterBody3D = game.get_node_or_null("Player") as CharacterBody3D
 	var terminal: Node3D = game.get_node_or_null("Terminal") as Node3D
+	var guard: CharacterBody3D = game.get_node_or_null("Guard") as CharacterBody3D
 	var puzzle: CanvasLayer = game.get_node_or_null("HackingPuzzle") as CanvasLayer
 	var input_manager: Node = root.get_node_or_null("InputManager")
-	if player == null or terminal == null or puzzle == null or input_manager == null:
+	if player == null or terminal == null or guard == null or puzzle == null or input_manager == null:
 		_fail("Main scene is missing Player, Terminal, HackingPuzzle, or InputManager.")
 		return
 
@@ -36,6 +37,20 @@ func _run_gameplay_smoke_test() -> void:
 		_fail("Virtual joystick input did not move the player forward.")
 		return
 	print("GAMEPLAY CHECK OK: virtual movement moves the player.")
+
+	# The guard should face its first patrol waypoint, not turn its back to it.
+	var patrol_points: Array = guard.get("patrol_points")
+	if patrol_points.is_empty():
+		_fail("Guard has no patrol waypoints.")
+		return
+	var first_waypoint: Vector3 = patrol_points[0]
+	var target_direction: Vector2 = Vector2(first_waypoint.x - guard.global_position.x, first_waypoint.z - guard.global_position.z).normalized()
+	var forward: Vector3 = -guard.global_transform.basis.z
+	var forward_direction: Vector2 = Vector2(forward.x, forward.z).normalized()
+	if forward_direction.dot(target_direction) < 0.65:
+		_fail("Guard is not facing its patrol waypoint.")
+		return
+	print("GAMEPLAY CHECK OK: guard faces its patrol route.")
 
 	# Put the player in front of the terminal and allow Area3D overlaps to update.
 	player.global_position = Vector3(0.0, 1.0, -4.0)
