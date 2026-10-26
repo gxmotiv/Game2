@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://scripts/gameplay/security_light.gd" id="1"]
 
@@ -127,6 +127,10 @@ rotation = Vector3(-0.785398, 0.785398, 0)
 [node name="SecurityLight" type="Node3D" parent="."]
 script = ExtResource("1")
 position = Vector3(6.0, 8.5, 0.0)
+light_node = NodePath("SecurityLightOmni")
+light_mesh = NodePath("SecurityLightMesh")
+light_mesh = NodePath("SecurityLightMesh")
+light_node = NodePath("SecurityLightOmni")
 
 [node name="SecurityLightMesh" type="MeshInstance3D" parent="SecurityLight"]
 mesh = SubResource("14")

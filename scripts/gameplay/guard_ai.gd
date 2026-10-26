@@ -61,7 +61,7 @@ var _stealth_system: Variant
 var _guard_id: int
 
 func _ready() -> void:
-	_stealth_system = Engine.get_singleton("StealthSystem")
+	_stealth_system = get_node_or_null("/root/StealthSystem")
 	
 	# Setup vision cone
 	if vision_cone_mesh:
@@ -134,7 +134,7 @@ func _check_player_visibility() -> void:
 		_last_known_player_pos = player_pos
 		_suspicion = clamp(_suspicion + suspicion_rise_rate * detection_update_interval, 0.0, 100.0)
 		if _stealth_system:
-			_stealth_system.call("suspicion_changed.emit", _guard_id, _suspicion)
+			_stealth_system.call("set_guard_suspicion", _guard_id, _suspicion)
 		suspicion_changed.emit(_suspicion)
 		detected_player.emit(player_pos)
 	else:
@@ -332,7 +332,7 @@ func _create_material(color: Color) -> StandardMaterial3D:
 	mat.albedo_color = color
 	mat.emission_enabled = true
 	mat.emission_energy_multiplier = 0.5
-	mat.emission_color = color
+	mat.emission = color
 	mat.transparency = StandardMaterial3D.TRANSPARENCY_ALPHA
 	mat.render_priority = 1
 	return mat

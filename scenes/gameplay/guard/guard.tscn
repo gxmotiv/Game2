@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/gameplay/guard_ai.gd" id="1"]
 
@@ -12,8 +12,7 @@ size = Vector3(0.7, 1.8, 0.35)
 [sub_resource type="StandardMaterial3D" id="4"]
 albedo_color = Color(0.15, 0.15, 0.2, 1.0)
 
-[sub_resource type="PrimitiveMesh" id="5"]
-type = 2
+[sub_resource type="CylinderMesh" id="5"]
 height = 15.0
 bottom_radius = 13.1
 top_radius = 0.0
@@ -38,7 +37,9 @@ render_priority = 1
 
 [node name="Guard" type="CharacterBody3D" scene_instance_id=1]
 script = ExtResource("1")
-patrol_points = [Vector3(-6, 0, -6), Vector3(6, 0, -6), Vector3(6, 0, 2), Vector3(-6, 0, 2)]
+patrol_points = [Vector3(-7, 0, -3), Vector3(-7, 0, 5), Vector3(-4, 0, 5), Vector3(-4, 0, -3)]
+vision_cone_mesh = NodePath("VisionCone")
+state_indicator = NodePath("StateIndicator")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("2")

@@ -306,8 +306,14 @@ func register_custom_action(action_name: String, action_type: int = ACTION_TYPE_
 	
 	InputMap.add_action(action_name, action_type)
 	InputMap.action_set_deadzone(action_name, deadzone)
-	for event in events:
-		InputMap.action_add_event(action_name, event)
+	for event_def in events:
+		var input_event: InputEvent = null
+		if event_def is Dictionary:
+			input_event = _create_event_from_def(event_def)
+		elif event_def is InputEvent:
+			input_event = event_def
+		if input_event:
+			InputMap.action_add_event(action_name, input_event)
 	
 	_action_definitions[action_name] = {
 		"type": action_type,

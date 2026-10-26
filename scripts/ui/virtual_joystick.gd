@@ -16,6 +16,8 @@ var _stick_node: Control
 var _base_node: Control
 
 func _ready() -> void:
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	set_process_input(true)
 	_stick_node = get_node("Stick")
 	_base_node = get_node("Base")
 	_center_pos = _base_node.position + _base_node.size * 0.5
@@ -26,37 +28,39 @@ func _ready() -> void:
 		pass  # Will call InputManager.set_touch_move_vector in _update_stick_position
 
 func _hide_stick() -> void:
+	# Visual-only helper. Do not call _reset_stick_internal() here: reset also
+	# hides the stick, so calling it from both functions caused infinite recursion.
 	_stick_node.visible = false
 	_base_node.modulate = Color(1, 1, 1, 0.3)
-	_reset_stick_internal()
 
 func _show_stick() -> void:
 	_stick_node.visible = true
 	_base_node.modulate = Color(1, 1, 1, 0.6)
 
-func _gui_input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:
+	# Read screen-space touch events globally so release/drag still works after
+	# a finger moves just outside the joystick's Control rectangle.
 	if event is InputEventScreenTouch:
 		_handle_touch(event)
 	elif event is InputEventScreenDrag:
 		_handle_drag(event)
 
 func _handle_touch(event: InputEventScreenTouch) -> void:
-	var local_pos = _base_node.get_local_mouse_position()
+	# Convert the actual touch point into the joystick's local coordinates.
+	var local_pos: Vector2 = _base_node.get_global_transform_with_canvas().affine_inverse() * event.position
 	var distance = local_pos.distance_to(_base_node.size * 0.5)
 	
-	if event.pressed and distance <= visual_radius:
+	if event.pressed and distance <= max_radius:
 		_dragging = true
 		_touch_id = event.index
 		_show_stick()
 		_update_stick_position(local_pos)
 	elif not event.pressed and event.index == _touch_id:
-		_dragging = false
-		_touch_id = -1
 		_reset_stick()
 
 func _handle_drag(event: InputEventScreenDrag) -> void:
 	if _dragging and event.index == _touch_id:
-		var local_pos = _base_node.get_local_mouse_position()
+		var local_pos: Vector2 = _base_node.get_global_transform_with_canvas().affine_inverse() * event.position
 		_update_stick_position(local_pos)
 
 func _update_stick_position(screen_pos: Vector2) -> void:

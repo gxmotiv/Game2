@@ -1,9 +1,9 @@
 extends CanvasLayer
 class_name MinigameUI
 
-@onready var timer_label = $TimerLabel
-@onready var hint_button = $ButtonContainer/HintButton
-@onready var exit_button = $ButtonContainer/ExitButton
+@onready var timer_label = $PuzzleContainer/TitleBar/TimerLabel
+@onready var hint_button = $PuzzleContainer/ButtonBar/HintButton
+@onready var exit_button = $PuzzleContainer/ButtonBar/ExitButton
 
 signal hint_requested()
 signal exit_requested()
@@ -23,7 +23,7 @@ func update_timer(seconds: float) -> void:
 	if timer_label:
 		timer_label.text = "%ds" % int(ceil(seconds))
 		if seconds <= 10.0:
-			timer_label.custom_colors.font_color = Color(1.0, 0.3, 0.3, 1.0)
+			timer_label.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3, 1.0))
 
 func set_hints_remaining(count: int) -> void:
 	if hint_button:
