@@ -3,7 +3,7 @@ extends Node
 func _enter_tree() -> void:
 	# A few Android/debug scene instantiations have returned UI nodes without
 	# their serialized script instance. Ensure PauseMenu's script is present
-	before its _ready() connects Resume/Restart/Settings/Quit buttons.
+	# before its _ready() connects Resume/Restart/Settings/Quit buttons.
 	_ensure_node_script("PauseMenu", "res://scripts/ui/pause_menu.gd")
 
 func _ensure_node_script(node_path: String, script_path: String) -> void:
