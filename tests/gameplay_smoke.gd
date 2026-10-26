@@ -7,7 +7,7 @@ func _fail(message: String) -> void:
 	push_error("GAMEPLAY_SMOKE_FAIL: " + message)
 	quit(1)
 
-func _joystick_press(joystick: VirtualJoystick, base: Control, direction: Vector2, touch_index: int) -> InputEventScreenTouch:
+func _joystick_press(joystick: Control, base: Control, direction: Vector2, touch_index: int) -> InputEventScreenTouch:
 	var event := InputEventScreenTouch.new()
 	event.index = touch_index
 	event.pressed = true
@@ -16,7 +16,7 @@ func _joystick_press(joystick: VirtualJoystick, base: Control, direction: Vector
 	joystick.handle_touch_event(event)
 	return event
 
-func _joystick_release(joystick: VirtualJoystick, event: InputEventScreenTouch) -> void:
+func _joystick_release(joystick: Control, event: InputEventScreenTouch) -> void:
 	var release := InputEventScreenTouch.new()
 	release.index = event.index
 	release.pressed = false
@@ -44,7 +44,7 @@ func _run_gameplay_smoke_test() -> void:
 		_fail("Main scene is missing Player, Terminal, Guard, HackingPuzzle, InputManager, or MobileHUD.")
 		return
 
-	var joystick: VirtualJoystick = mobile_hud.get_node("JoystickContainer/VirtualJoystick") as VirtualJoystick
+	var joystick: Control = mobile_hud.get_node("JoystickContainer/VirtualJoystick") as Control
 	var base: Control = joystick.get_node("Base")
 	var interact_button: Button = mobile_hud.get_node("ButtonContainer/InteractButton")
 	var sprint_button: Button = mobile_hud.get_node("ButtonContainer/SprintButton")
