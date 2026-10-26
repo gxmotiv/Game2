@@ -201,7 +201,7 @@ func _handle_patrol(delta: float) -> void:
 	if patrol_points.size() == 0:
 		return
 	
-		var distance = Vector2(global_position.x, global_position.z).distance_to(Vector2(_target_position.x, _target_position.z))
+	var distance = Vector2(global_position.x, global_position.z).distance_to(Vector2(_target_position.x, _target_position.z))
 	
 	if distance < 1.0:
 		_patrol_timer += delta
@@ -220,7 +220,7 @@ func _handle_suspicious(delta: float) -> void:
 func _handle_investigating(delta: float) -> void:
 	_investigation_timer -= delta
 	
-		var distance = Vector2(global_position.x, global_position.z).distance_to(Vector2(_target_position.x, _target_position.z))
+	var distance = Vector2(global_position.x, global_position.z).distance_to(Vector2(_target_position.x, _target_position.z))
 	if distance < 1.5:
 		_investigation_timer = investigation_time
 		_target_position = _last_known_player_pos + Vector3(randf_range(-3, 3), 0, randf_range(-3, 3))
@@ -235,7 +235,7 @@ func _handle_alert(delta: float) -> void:
 func _handle_searching(delta: float) -> void:
 	_search_timer -= delta
 	
-		var distance = Vector2(global_position.x, global_position.z).distance_to(Vector2(_target_position.x, _target_position.z))
+	var distance = Vector2(global_position.x, global_position.z).distance_to(Vector2(_target_position.x, _target_position.z))
 	if distance < 1.5:
 		_target_position = _last_known_player_pos + Vector3(randf_range(-4, 4), 0, randf_range(-4, 4))
 
