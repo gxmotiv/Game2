@@ -30,9 +30,8 @@ func _on_button_pressed() -> void:
 			else:
 				pause_menu.call("show_menu")
 		"sprint":
-			# Sprint is toggled on mobile: tap once to sprint, tap again to stop.
-			set_pressed_no_signal(not button_pressed)
-			InputManager.set_touch_sprint(button_pressed)
+			# The toggled signal owns sprint state; do not invert it a second time.
+			pass
 	_update_feedback()
 
 func _on_toggled(is_on: bool) -> void:
