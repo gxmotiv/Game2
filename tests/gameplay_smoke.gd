@@ -136,11 +136,11 @@ func _run_gameplay_smoke_test() -> void:
 
 	# Pause should stop the game, show the overlay, and resume through the menu.
 	pause_button.call("_on_button_pressed")
-	if not get_root().paused or not bool(pause_menu.get("visible")):
+	if not paused or not bool(pause_menu.get("visible")):
 		_fail("PAUSE button did not pause the tree and show the pause menu.")
 		return
 	pause_menu.call("hide_menu")
-	if get_root().paused or bool(pause_menu.get("visible")):
+	if paused or bool(pause_menu.get("visible")):
 		_fail("RESUME did not unpause and hide the pause menu.")
 		return
 	print("GAMEPLAY CHECK OK: PAUSE and RESUME work.")
