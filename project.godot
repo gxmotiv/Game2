@@ -15,8 +15,10 @@ run/max_fps=30
 
 [display]
 
-window/size/viewport_width=1280
-window/size/viewport_height=720
+window/size/viewport_width=960
+window/size/viewport_height=540
+window/stretch/mode="viewport"
+window/stretch/aspect="expand"
 window/size/resizable=false
 window/size/fullscreen_mode=2
 window/size/always_on_top=false
