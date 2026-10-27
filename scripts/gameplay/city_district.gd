@@ -153,6 +153,51 @@ func _build_city_geometry() -> void:
 			cap_instances.append({"position": Vector3(x_sign * 4.2, 3.35, z_sign * 4.2), "size": Vector3(0.45, 0.12, 0.45)})
 	_add_multimesh_boxes("JunctionLampCaps", cap_instances, lamp_cap_material, false)
 
+	# Small street props add scale and a readable cyberpunk identity without per-prop nodes.
+	# All props are batched into MultiMeshes and intentionally have no collision bodies.
+	var utility_box_instances: Array[Dictionary] = []
+	var camera_housing_instances: Array[Dictionary] = []
+	var camera_lens_instances: Array[Dictionary] = []
+	var bollard_instances: Array[Dictionary] = []
+	var utility_material := _material(Color(0.10, 0.15, 0.18))
+	utility_material.metallic = 0.35
+	utility_material.roughness = 0.68
+	var camera_material := _material(Color(0.055, 0.075, 0.09))
+	camera_material.metallic = 0.45
+	camera_material.roughness = 0.42
+	var camera_lens_material := _material(Color(0.04, 0.58, 0.82), true)
+	camera_lens_material.emission_energy_multiplier = 0.8
+	var bollard_material := _material(Color(0.19, 0.23, 0.25))
+
+	# Utility cabinets sit beside the sidewalks at major junctions.
+	for street_x in [-STREET_SPACING, 0.0, STREET_SPACING]:
+		for street_z in [-STREET_SPACING, STREET_SPACING]:
+			utility_box_instances.append({
+				"position": Vector3(float(street_x) + 5.0, 0.62, float(street_z) + 5.0),
+				"size": Vector3(0.72, 1.15, 0.48)
+			})
+
+	# Compact camera housings are placed high on selected building-facing corners.
+	# Their cyan lenses are decorative only; the existing security network remains authoritative.
+	for block_x in [-1.0, 0.0, 1.0]:
+		for block_z in [-1.0, 0.0, 1.0]:
+			var camera_pos := Vector3(block_x * STREET_SPACING + 7.2, 3.0, block_z * STREET_SPACING - 7.2)
+			camera_housing_instances.append({"position": camera_pos, "size": Vector3(0.48, 0.24, 0.32)})
+			camera_lens_instances.append({"position": camera_pos + Vector3(0.0, -0.015, -0.18), "size": Vector3(0.15, 0.12, 0.035)})
+
+	# Short safety bollards visually separate sidewalks from road edges.
+	for street in [-STREET_SPACING, 0.0, STREET_SPACING]:
+		for side in [-1.0, 1.0]:
+			for offset in [-5.0, 5.0]:
+				bollard_instances.append({
+					"position": Vector3(float(street) + offset, 0.38, float(side) * 5.0),
+					"size": Vector3(0.20, 0.76, 0.20)
+				})
+	_add_multimesh_boxes("StreetUtilityCabinets", utility_box_instances, utility_material, false)
+	_add_multimesh_boxes("DecorativeCameraHousings", camera_housing_instances, camera_material, false)
+	_add_multimesh_boxes("DecorativeCameraLenses", camera_lens_instances, camera_lens_material, false)
+	_add_multimesh_boxes("SidewalkBollards", bollard_instances, bollard_material, false)
+
 	var sun := DirectionalLight3D.new()
 	sun.name = "DistrictLight"
 	sun.rotation = Vector3(deg_to_rad(-52.0), deg_to_rad(35.0), 0.0)
