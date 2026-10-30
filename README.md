@@ -20,7 +20,8 @@ VEIL CIRCUIT is an original stealth-action game where you play as a cybernetical
 - **Hacking:** Interactive circuit puzzle and hackable terminals connected to the security-light network.
 - **Stealth foundation:** Guard patrols and security devices; a larger mission and detection system remains in development.
 - **Mobile controls:** Touch joystick, camera-look area, sprint, crouch, interact, and pause/resume.
-- **Performance strategy:** Godot Compatibility renderer, batched MultiMesh city props, limited dynamic lighting, and a 30 FPS target for low-end Android.
+- **Visual pass:** Procedural asphalt grain, concrete slab seams, facade panel variation, brushed-metal detail, filmic night grading, depth fog, restrained glow, rooftop trims, neon signage, antennas, and intersection crosswalks.
+- **Performance strategy:** Godot Compatibility renderer, batched MultiMesh city props and decorative details, no real-time shadows/reflections, low-cost shader math, and a 30 FPS target for low-end Android.
 - **Zero-budget policy:** Built-in Godot geometry/materials and free/open-source resources only; no paid assets, API keys, ads, tracking, or required runtime downloads.
 
 ## Planned next milestones
@@ -28,6 +29,7 @@ VEIL CIRCUIT is an original stealth-action game where you play as a cybernetical
 - Improve guard awareness and stealth feedback, then add mission objectives and progression.
 - Add safe, tested character movement and hacking animations.
 - Add optional free licensed sound effects and ambient audio with documented asset licenses.
+- Add selected CC0 PBR texture assets at optimized 512–1024 px sizes only after visual and memory profiling; do not add large texture packs blindly.
 - Continue profiling on real Android hardware before raising texture sizes, lighting cost, or scene density.
 - See `docs/OPEN_CITY_ROADMAP.md` for the broader roadmap. Remote camera control, vehicles, drones, and streaming a much larger city are not claimed as complete features.
 
@@ -115,11 +117,7 @@ godot --headless --script-classes
 
 ## Asset Strategy
 
-All assets are original or CC0-licensed:
-- Kenney.nl asset packs (Industrial, Character, UI)
-- Procedural materials via Godot shaders
-- Bfxr/Freesound for audio (CC0)
-- Blender for custom low-poly models
+Current district materials are original, procedural Godot shaders and generated MultiMesh geometry; no third-party texture downloads are required at runtime. Candidate CC0 sources for future, individually verified additions are listed in `docs/VISUAL_ASSET_SOURCES.md`.
 
 ## Low-End Character Visuals
 
@@ -133,6 +131,10 @@ The model is a lightweight visual prototype, not yet a rigged/animated productio
 character. The Compatibility renderer and 30 FPS target remain in place. Real-device
 frame rate, heat, memory use, and long-session stability must still be measured on
 the target Android phone before making performance guarantees.
+
+## Visual Pass 1 — Night-City Materials and Dressing
+
+The city now has a dedicated visual pass in `scripts/gameplay/city_visual_pass.gd`. Four small spatial shaders add asphalt grain, tiled concrete joints, building facade panel variation, and brushed metal. A WorldEnvironment supplies a deep-blue night palette, filmic tonemapping, restrained glow, and distance fog. Building roof trims, neon sign bars, rooftop antennas, and crosswalk stripes are generated in a handful of MultiMesh batches. These are procedural materials/details, not high-resolution downloaded textures; the project remains offline-first and avoids a large texture-memory spike. See `docs/VISUAL_ASSET_SOURCES.md` for the CC0 libraries reviewed for future additions.
 
 ## Batched City Facade Details
 
