@@ -10,14 +10,16 @@ func _ready() -> void:
 	_build_character()
 
 func _build_character() -> void:
-	var fabric := StandardMaterial3D.new()
-	fabric.albedo_color = Color(0.025, 0.045, 0.07, 1.0)
-	fabric.roughness = 0.82
+	var fabric := ShaderMaterial.new()
+	fabric.shader = preload("res://shaders/character_fabric.gdshader")
+	fabric.set_shader_parameter("fabric_color", Vector3(0.018, 0.032, 0.052))
+	fabric.set_shader_parameter("weave_scale", 34.0)
 
-	var armor := StandardMaterial3D.new()
-	armor.albedo_color = Color(0.11, 0.15, 0.20, 1.0)
-	armor.metallic = 0.52
-	armor.roughness = 0.42
+	var armor := ShaderMaterial.new()
+	armor.shader = preload("res://shaders/city_metal.gdshader")
+	armor.set_shader_parameter("base_color", Vector3(0.075, 0.12, 0.17))
+	armor.set_shader_parameter("metallic_value", 0.62)
+	armor.set_shader_parameter("roughness_value", 0.38)
 
 	var cyan := StandardMaterial3D.new()
 	cyan.albedo_color = Color(0.03, 0.72, 1.0, 1.0)
@@ -32,6 +34,7 @@ func _build_character() -> void:
 	var fabric_tool := SurfaceTool.new()
 	fabric_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	_add_box(fabric_tool, Vector3(0, 0, 0), Vector3(0.54, 0.68, 0.32))
+	_add_box(fabric_tool, Vector3(0, 0.41, 0.015), Vector3(0.43, 0.13, 0.35))
 	_add_sphere(fabric_tool, Vector3(0, 0.56, 0.01), 0.19)
 	_add_box(fabric_tool, Vector3(-0.37, 0.02, 0), Vector3(0.16, 0.35, 0.18))
 	_add_box(fabric_tool, Vector3(0.37, 0.02, 0), Vector3(0.16, 0.35, 0.18))
@@ -42,6 +45,9 @@ func _build_character() -> void:
 	var armor_tool := SurfaceTool.new()
 	armor_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	_add_box(armor_tool, Vector3(0, 0.08, -0.17), Vector3(0.40, 0.32, 0.075))
+	_add_box(armor_tool, Vector3(0, 0.12, -0.225), Vector3(0.31, 0.22, 0.045))
+	_add_box(armor_tool, Vector3(-0.30, 0.34, -0.01), Vector3(0.25, 0.11, 0.26))
+	_add_box(armor_tool, Vector3(0.30, 0.34, -0.01), Vector3(0.25, 0.11, 0.26))
 	_add_box(armor_tool, Vector3(-0.29, 0.24, 0), Vector3(0.20, 0.18, 0.24))
 	_add_box(armor_tool, Vector3(0.29, 0.24, 0), Vector3(0.20, 0.18, 0.24))
 	_add_box(armor_tool, Vector3(-0.39, -0.23, -0.015), Vector3(0.145, 0.29, 0.16))
@@ -49,6 +55,9 @@ func _build_character() -> void:
 	_add_box(armor_tool, Vector3(-0.15, -0.72, -0.005), Vector3(0.15, 0.33, 0.18))
 	_add_box(armor_tool, Vector3(0.15, -0.72, -0.005), Vector3(0.15, 0.33, 0.18))
 	_add_box(armor_tool, Vector3(0, 0.025, 0.22), Vector3(0.32, 0.40, 0.16))
+	_add_box(armor_tool, Vector3(0, 0.10, 0.315), Vector3(0.24, 0.21, 0.055))
+	_add_box(armor_tool, Vector3(-0.21, 0.05, -0.12), Vector3(0.055, 0.36, 0.055))
+	_add_box(armor_tool, Vector3(0.21, 0.05, -0.12), Vector3(0.055, 0.36, 0.055))
 	_add_box(armor_tool, Vector3(0, -0.31, 0), Vector3(0.44, 0.12, 0.31))
 	_add_box(armor_tool, Vector3(-0.23, -0.31, -0.09), Vector3(0.12, 0.14, 0.10))
 	_add_box(armor_tool, Vector3(0.23, -0.31, -0.09), Vector3(0.12, 0.14, 0.10))
@@ -61,7 +70,9 @@ func _build_character() -> void:
 	var tech_tool := SurfaceTool.new()
 	tech_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	_add_box(tech_tool, Vector3(0, 0.58, -0.17), Vector3(0.28, 0.075, 0.035))
-	_add_box(tech_tool, Vector3(0, 0.08, -0.214), Vector3(0.16, 0.055, 0.025))
+	_add_box(tech_tool, Vector3(0, 0.08, -0.265), Vector3(0.22, 0.045, 0.025))
+	_add_box(tech_tool, Vector3(-0.39, -0.22, -0.19), Vector3(0.08, 0.035, 0.025))
+	_add_box(tech_tool, Vector3(0.39, -0.22, -0.19), Vector3(0.08, 0.035, 0.025))
 	_add_box(tech_tool, Vector3(-0.43, -0.25, -0.105), Vector3(0.17, 0.08, 0.13))
 	_add_surface(combined, tech_tool, cyan)
 
