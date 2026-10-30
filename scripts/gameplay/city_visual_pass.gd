@@ -20,32 +20,32 @@ func _apply_visual_pass() -> void:
 
 	_add_environment(city)
 	_set_material(city, "RoadNetwork", _shader_material(ROAD_SHADER, {
-		"base_color": Color(0.035, 0.052, 0.072),
+		"base_color": Vector3(0.035, 0.052, 0.072),
 		"roughness_value": 0.86,
 		"grain_strength": 0.13
 	}))
 	_set_material(city, "DistrictGround/MeshInstance3D", _shader_material(CONCRETE_SHADER, {
-		"base_color": Color(0.075, 0.105, 0.13),
-		"seam_color": Color(0.035, 0.052, 0.07),
+		"base_color": Vector3(0.075, 0.105, 0.13),
+		"seam_color": Vector3(0.035, 0.052, 0.07),
 		"tile_scale": 0.18,
 		"seam_width": 0.012,
 		"roughness_value": 0.95
 	}))
 	_set_material(city, "SidewalkBlocks", _shader_material(CONCRETE_SHADER, {
-		"base_color": Color(0.16, 0.205, 0.23),
-		"seam_color": Color(0.065, 0.095, 0.12),
+		"base_color": Vector3(0.16, 0.205, 0.23),
+		"seam_color": Vector3(0.065, 0.095, 0.12),
 		"tile_scale": 0.40,
 		"seam_width": 0.022,
 		"roughness_value": 0.92
 	}))
 	_set_material(city, "CityBuildings", _shader_material(FACADE_SHADER, {
-		"base_color": Color.WHITE,
+		"base_color": Vector3.ONE,
 		"roughness_value": 0.84,
 		"panel_scale": 0.72
 	}))
 
 	var metal_material := _shader_material(METAL_SHADER, {
-		"base_color": Color(0.075, 0.12, 0.15),
+		"base_color": Vector3(0.075, 0.12, 0.15),
 		"metallic_value": 0.48,
 		"roughness_value": 0.58
 	})
@@ -149,17 +149,17 @@ func _add_facade_and_roof_details(city: Node3D) -> void:
 				"position": sign_center,
 				"size": Vector3(2.45, 0.78, 0.12)
 			})
-			var line_array := cyan_sign_lines if (index / 4) % 2 == 0 else amber_sign_lines
+			var line_array := cyan_sign_lines if index % 8 == 0 else amber_sign_lines
 			line_array.append({
-				"position": sign_center + Vector3(0.0, 0.26, -0.075),
+				"position": sign_center + Vector3(0.0, 0.26, 0.075),
 				"size": Vector3(2.05, 0.055, 0.035)
 			})
 			line_array.append({
-				"position": sign_center + Vector3(-0.58, -0.05, -0.075),
+				"position": sign_center + Vector3(-0.58, -0.05, 0.075),
 				"size": Vector3(0.78, 0.055, 0.035)
 			})
 			line_array.append({
-				"position": sign_center + Vector3(0.50, -0.20, -0.075),
+				"position": sign_center + Vector3(0.50, -0.20, 0.075),
 				"size": Vector3(0.95, 0.035, 0.035)
 			})
 
