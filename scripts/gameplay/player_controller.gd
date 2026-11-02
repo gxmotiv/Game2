@@ -256,7 +256,7 @@ func _check_interaction(delta: float) -> void:
 
 func _refresh_environment_target() -> void:
 	var previous_target := _current_environment_hackable
-	var forward := Vector3(0.0, -0.06, -1.0).rotated(Vector3.UP, _camera_yaw).normalized()
+	var forward := Vector3(0.0, -0.25, -1.0).rotated(Vector3.UP, _camera_yaw).normalized()
 	var ray_origin := global_position + Vector3(0.0, 1.2, 0.0)
 	var query := PhysicsRayQueryParameters3D.create(ray_origin, ray_origin + forward * 8.0)
 	query.exclude = [get_rid()]
