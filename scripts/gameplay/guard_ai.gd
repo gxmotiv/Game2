@@ -278,6 +278,7 @@ func _change_state(new_state: int) -> void:
 	_state = new_state
 	if vision_cone_mesh:
 		vision_cone_mesh.visible = false
+	_update_awareness_indicator()
 	if _state == State.SEARCHING:
 		_search_timer = search_time
 	elif _state == State.RETURNING and not _patrol_world_points.is_empty():
