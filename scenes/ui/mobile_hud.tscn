@@ -1,8 +1,9 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/virtual_joystick.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/ui/touch_button.gd" id="2"]
 [ext_resource type="Script" path="res://scripts/ui/mobile_hud.gd" id="3"]
+[ext_resource type="Script" path="res://scripts/ui/hack_progress_ring.gd" id="4"]
 
 [sub_resource type="StyleBoxFlat" id="3"]
 bg_color = Color(0.1, 0.1, 0.15, 0.8)
@@ -167,12 +168,23 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -300.0
+offset_left = -410.0
 offset_top = -180.0
 offset_right = -20.0
 offset_bottom = -20.0
 alignment = 2
 theme_override_constants/separation = 20
+
+[node name="HackButton" type="Button" parent="ButtonContainer" script=ExtResource("2")]
+action_name = "hack"
+custom_minimum_size = Vector2(88, 48)
+theme_override_styles/normal = SubResource("5")
+text = "HACK"
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+mouse_filter = 0
+visible = false
 
 [node name="InteractButton" type="Button" parent="ButtonContainer" script=ExtResource("2")]
 action_name = "interact"
@@ -203,3 +215,14 @@ theme_override_font_sizes/font_size = 14
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 mouse_filter = 0
+[node name="HackProgressRing" type="Control" parent="." script=ExtResource("4")]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -72.0
+offset_top = -72.0
+offset_right = 72.0
+offset_bottom = 72.0
+visible = false
