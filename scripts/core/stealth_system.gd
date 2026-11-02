@@ -21,7 +21,7 @@ signal sound_event(position: Vector3, loudness: float, source_id: int)
 @export_group("Suspicion Settings")
 @export var base_suspicion_rise_rate: float = 15.0
 @export var base_suspicion_decay_rate: float = 5.0
-@export var detection_threshold: float = 75.0
+@export var detection_threshold: float = 100.0
 @export var suspicion_decay_delay: float = 1.0
 
 @export_group("Stance Modifiers")

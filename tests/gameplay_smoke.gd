@@ -44,6 +44,77 @@ func _run_gameplay_smoke_test() -> void:
 		_fail("Main scene is missing Player, Terminal, Guard, HackingPuzzle, InputManager, or MobileHUD.")
 		return
 
+	# Phase 3 regression checks: three route-driven guards, RayCast3D vision,
+	# a half-range crouch modifier, and physical cover blocking sight.
+	var guards := get_nodes_in_group("guards")
+	if guards.size() != 3:
+		_fail("Expected exactly three city guards, found " + str(guards.size()) + ".")
+		return
+	for guard_node in guards:
+		if not guard_node is CharacterBody3D:
+			_fail("A guard is not a CharacterBody3D.")
+			return
+		if not guard_node.get_node_or_null("VisionRay") is RayCast3D:
+			_fail("A guard is missing its VisionRay RayCast3D.")
+			return
+		if not guard_node.get_node_or_null("AwarenessLabel") is Label3D:
+			_fail("A guard is missing its overhead awareness indicator.")
+			return
+		var patrol_route: Array = guard_node.call("get_patrol_points")
+		if patrol_route.size() < 4:
+			_fail("A guard does not have four patrol waypoints.")
+			return
+	print("STEALTH CHECK OK: three guards have four waypoints, RayCast3D vision, and overhead awareness labels.")
+
+	# Align the central guard with the player for deterministic vision tests.
+	guard.global_position = Vector3(0.0, 1.0, 4.0)
+	guard.rotation = Vector3.ZERO
+	guard.set("_target_position", Vector3(0.0, 1.0, 0.0))
+	player.global_position = Vector3(0.0, 1.0, 0.0)
+	player.set("_is_crouching", false)
+	if not bool(guard.call("can_see_player_now")):
+		_fail("An unobstructed player directly in front of a guard was not detected.")
+		return
+	var standing_detection_range: float = float(guard.call("get_detection_range_for_player", player))
+	player.set("_is_crouching", true)
+	var crouching_detection_range: float = float(guard.call("get_detection_range_for_player", player))
+	if not is_equal_approx(standing_detection_range, 15.0) or not is_equal_approx(crouching_detection_range, 7.5):
+		_fail("Crouching did not halve the guard's detection radius.")
+		return
+	player.global_position = Vector3(0.0, 1.0, -4.0)
+	if bool(guard.call("can_see_player_now")):
+		_fail("A crouching player outside the halved detection radius was still visible.")
+		return
+	player.global_position = Vector3(0.0, 1.0, 0.0)
+	if not bool(guard.call("can_see_player_now")):
+		_fail("A crouching player inside the reduced detection radius was not visible.")
+		return
+	player.set("_is_crouching", false)
+	print("STEALTH CHECK OK: vision cone detects in front and crouching halves range from 15m to 7.5m.")
+
+	# A real collision body between guard and player must block the RayCast3D.
+	var cover_body := StaticBody3D.new()
+	cover_body.name = "StealthTestCover"
+	cover_body.position = Vector3(0.0, 1.4, 2.0)
+	var cover_shape := CollisionShape3D.new()
+	var cover_box := BoxShape3D.new()
+	cover_box.size = Vector3(2.0, 2.8, 0.5)
+	cover_shape.shape = cover_box
+	cover_body.add_child(cover_shape)
+	game.get_node("World").add_child(cover_body)
+	await physics_frame
+	if bool(guard.call("can_see_player_now")):
+		_fail("A solid cover wall did not block the guard's vision ray.")
+		return
+	cover_body.queue_free()
+	await physics_frame
+	# Restore the guard to its normal route before the existing movement tests.
+	guard.global_position = Vector3(-5.0, 1.0, -5.0)
+	guard.rotation = Vector3.ZERO
+	guard.velocity = Vector3.ZERO
+	guard.set("_target_position", Vector3(-8.0, 1.0, -8.0))
+	print("STEALTH CHECK OK: physical cover blocks line of sight.")
+
 	var joystick: Control = mobile_hud.get_node("JoystickContainer/VirtualJoystick") as Control
 	var joystick_script: Script = joystick.get_script() as Script
 	print("JOYSTICK_DIAGNOSTIC: script=", joystick_script.resource_path if joystick_script != null else "NULL",
@@ -257,5 +328,33 @@ func _run_gameplay_smoke_test() -> void:
 		_fail("Hacking puzzle did not close after success.")
 		return
 	print("GAMEPLAY CHECK OK: circuit puzzle completes and terminal records the hack.")
+
+	# Complete the awareness meter to verify the 100% spotted/alarm transition.
+	var stealth_system: Node = root.get_node_or_null("StealthSystem")
+	if stealth_system == null or not is_equal_approx(float(stealth_system.get("detection_threshold")), 100.0):
+		_fail("Shared StealthSystem detection threshold is not 100 percent.")
+		return
+	guard.global_position = Vector3(0.0, 1.0, 4.0)
+	guard.rotation = Vector3.ZERO
+	guard.set("_target_position", player.global_position)
+	player.global_position = Vector3(0.0, 1.0, 0.0)
+	player.set("_is_crouching", false)
+	guard.call("_check_player_visibility", 5.0)
+	if not is_equal_approx(float(guard.call("get_suspicion")), 100.0):
+		_fail("A sustained clear sighting did not fill suspicion to 100 percent.")
+		return
+	if int(guard.call("get_state")) != 3:
+		_fail("A 100 percent suspicion level did not transition the guard to ALERT.")
+		return
+	var awareness_label: Label3D = guard.get_node("AwarenessLabel") as Label3D
+	if awareness_label == null or not awareness_label.visible or not awareness_label.text.begins_with("!"):
+		_fail("The guard awareness indicator did not switch to the red exclamation mark.")
+		return
+	var spotted_banner: Label = game.get_node_or_null("DetectionFeedback/SpottedBanner") as Label
+	var red_flash: ColorRect = game.get_node_or_null("DetectionFeedback/RedAlertFlash") as ColorRect
+	if spotted_banner == null or not spotted_banner.visible or red_flash == null:
+		_fail("The 100 percent detection event did not trigger the on-screen security alarm.")
+		return
+	print("STEALTH CHECK OK: 100 percent suspicion triggers ALERT, red exclamation marker, and screen alarm.")
 	print("GAMEPLAY SMOKE TEST PASSED.")
 	quit(0)
