@@ -31,8 +31,15 @@ The official Watch Dogs description highlights manipulating traffic lights, trai
 - Network battery/cooldown: powerful hacks consume energy and recover over time.
 - Clear hack prompts, range checks, cooldown indicators, and failure feedback.
 
-### Phase C — Stealth and mission loop
-- Guard patrol routes, vision checks, suspicion, investigation, search, and alert recovery.
+### Phase C1 — Guard stealth foundation (current implementation)
+- Three lightweight guard NPCs patrol four-waypoint routes in the procedural district.
+- A 90-degree field of view and `RayCast3D` verifies range, direction and physical line-of-sight; city buildings and cover block detection.
+- Crouching halves the guard's detection radius (15 m to 7.5 m with the current defaults).
+- Per-guard suspicion rises from 0 to 100 while visible, decays after line-of-sight is broken, and transitions through patrol, suspicious, alert, search and return states.
+- A billboard overhead indicator fills from yellow `?` to red `!`; reaching 100% triggers a red screen flash and a security-alarm banner.
+- Keep the existing terminal objective, touch controls and circuit puzzle unchanged; validate the complete stealth loop on physical Android hardware before expanding it.
+
+### Phase C2 — Mission loop (not started)
 - Mission objectives with optional routes: disable security, reach a data point, extract, and escape.
 - Checkpoints, objective markers, mission results, and local save/progression.
 - Sound distractions and simple takedown/avoidance rules, only after core stealth is stable.
