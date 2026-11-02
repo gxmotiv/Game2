@@ -321,7 +321,7 @@ func _spawn_environment_hackable(node_name: String, kind: int, position: Vector3
 	prop.position = position
 	prop.set("object_type", kind)
 	prop.set("display_name", label)
-	prop.set("effect_radius", 12.0 if kind == 2 else 10.0)
+	prop.set("effect_radius", 12.0 if kind == 0 or kind == 2 else 10.0)
 	add_child(prop)
 
 func _add_solid_box(box_name: String, position: Vector3, size: Vector3, material: Material) -> void:
