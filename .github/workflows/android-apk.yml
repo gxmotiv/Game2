@@ -1,0 +1,206 @@
+name: Godot Android APK (ARMv7)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: godot-android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  export-android:
+    name: Export VEIL CIRCUIT for Android (armeabi-v7a)
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+
+    env:
+      GODOT_VERSION: 4.3-stable
+      ANDROID_SDK_ROOT: ${{ runner.temp }}/android-sdk
+      ANDROID_HOME: ${{ runner.temp }}/android-sdk
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$ANDROID_SDK_ROOT"
+          sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --install \
+            "platform-tools" \
+            "platforms;android-30" \
+            "platforms;android-34" \
+            "build-tools;34.0.0" \
+            "ndk;23.2.8568313" \
+            "cmake;3.10.2.4988404"
+          yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --licenses >/dev/null || true
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl unzip libfontconfig1
+
+      - name: Download Godot 4.3 headless editor
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+          curl --fail --location --retry 3 --retry-all-errors "$url" -o "$RUNNER_TEMP/godot.zip"
+          mkdir -p "$RUNNER_TEMP/godot"
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+          chmod +x "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}_linux.x86_64"
+          echo "GODOT_BIN=$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}_linux.x86_64" >> "$GITHUB_ENV"
+          "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}_linux.x86_64" --headless --version
+
+      - name: Download and install Godot 4.3 export templates
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_export_templates.tpz"
+          curl --fail --location --retry 3 --retry-all-errors "$url" -o "$RUNNER_TEMP/export_templates.tpz"
+          mkdir -p "$RUNNER_TEMP/templates" "$HOME/.local/share/godot/export_templates/4.3.stable"
+          unzip -q "$RUNNER_TEMP/export_templates.tpz" -d "$RUNNER_TEMP/templates"
+          test -d "$RUNNER_TEMP/templates/templates"
+          cp -a "$RUNNER_TEMP/templates/templates/." "$HOME/.local/share/godot/export_templates/4.3.stable/"
+          test -s "$HOME/.local/share/godot/export_templates/4.3.stable/android_debug.apk"
+          test -s "$HOME/.local/share/godot/export_templates/4.3.stable/android_release.apk"
+
+      - name: Configure Android debug signing
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.android" "$HOME/.config/godot"
+          keytool -genkeypair -noprompt \
+            -keystore "$HOME/.android/debug.keystore" \
+            -storepass android \
+            -alias androiddebugkey \
+            -keypass android \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US"
+          cat > "$HOME/.config/godot/editor_settings-4.3.tres" <<EOF
+          [gd_resource type="EditorSettings" format=3]
+
+          [resource]
+          export/android/android_sdk_path = "$ANDROID_SDK_ROOT"
+          export/android/java_sdk_path = "$JAVA_HOME"
+          export/android/debug_keystore = "$HOME/.android/debug.keystore"
+          export/android/debug_keystore_user = "androiddebugkey"
+          export/android/debug_keystore_pass = "android"
+          EOF
+
+      - name: Enforce ARMv7-only Android Debug preset
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path("export_presets.cfg")
+          if not path.is_file():
+              raise SystemExit("ERROR: export_presets.cfg is missing.")
+
+          lines = path.read_text(encoding="utf-8").splitlines()
+          preset_start = None
+          preset_end = None
+
+          for i, line in enumerate(lines):
+              match = re.fullmatch(r"\[preset\.(\d+)\]", line.strip())
+              if not match:
+                  continue
+              end = next((j for j in range(i + 1, len(lines)) if lines[j].startswith("[")), len(lines))
+              block = lines[i:end]
+              if 'name="Android Debug"' in block and 'platform="Android"' in block:
+                  preset_start, preset_end = i, end
+                  preset_id = match.group(1)
+                  break
+
+          if preset_start is None:
+              raise SystemExit('ERROR: expected Android Debug export preset was not found.')
+
+          options_header = f"[preset.{preset_id}.options]"
+          try:
+              options_start = lines.index(options_header, preset_start, preset_end)
+          except ValueError:
+              lines.insert(preset_end, options_header)
+              options_start = preset_end
+              preset_end += 1
+
+          options_end = next((j for j in range(options_start + 1, len(lines)) if lines[j].startswith("[")), len(lines))
+          forced = {
+              "architectures/armeabi-v7a": "true",
+              "architectures/arm64-v8a": "false",
+              "architectures/x86": "false",
+              "architectures/x86_64": "false",
+          }
+          seen = set()
+          updated = []
+          for line in lines[options_start + 1:options_end]:
+              key = line.split("=", 1)[0].strip()
+              if key in forced:
+                  if key not in seen:
+                      updated.append(f"{key}={forced[key]}")
+                      seen.add(key)
+              else:
+                  updated.append(line)
+          for key, value in forced.items():
+              if key not in seen:
+                  updated.append(f"{key}={value}")
+          lines[options_start + 1:options_end] = updated
+          path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+          print("Android Debug preset configured for armeabi-v7a only.")
+          PY
+
+      - name: Import project resources
+        run: |
+          set -euo pipefail
+          "$GODOT_BIN" --headless --editor --path "$GITHUB_WORKSPACE" --import
+
+      - name: Export game-debug.apk
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/android
+          "$GODOT_BIN" --headless --path "$GITHUB_WORKSPACE" \
+            --export-debug "Android Debug" "build/android/game-debug.apk"
+          test -s "build/android/game-debug.apk"
+          ls -lh "build/android/game-debug.apk"
+
+      - name: Verify APK contains ARMv7 and excludes ARM64
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk="build/android/game-debug.apk"
+          unzip -Z1 "$apk" | grep -q '^lib/armeabi-v7a/' || {
+            echo "ERROR: APK has no armeabi-v7a native libraries."
+            exit 1
+          }
+          if unzip -Z1 "$apk" | grep -q '^lib/arm64-v8a/'; then
+            echo "ERROR: ARM64 libraries were found; expected ARMv7 only."
+            exit 1
+          fi
+          echo "Verified: armeabi-v7a present; arm64-v8a absent."
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: game-debug-apk
+          path: build/android/game-debug.apk
+          if-no-files-found: error
+          retention-days: 30
