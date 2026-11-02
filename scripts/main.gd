@@ -1,9 +1,11 @@
 extends Node
 
+var _alarm_active: bool = false
+var _alarm_flash: ColorRect
+var _alarm_banner: Label
+
 func _enter_tree() -> void:
-	# A few Android/debug scene instantiations have returned UI nodes without
-	# their serialized script instance. Ensure PauseMenu's script is present
-	# before its _ready() connects Resume/Restart/Settings/Quit buttons.
+	# Recover the pause-menu script before its child controls run _ready().
 	_ensure_node_script("PauseMenu", "res://scripts/ui/pause_menu.gd")
 
 func _ensure_node_script(node_path: String, script_path: String) -> void:
@@ -18,9 +20,7 @@ func _ensure_node_script(node_path: String, script_path: String) -> void:
 		target.set_script(desired_script)
 
 func _ready() -> void:
-	# Explicitly start with all modal overlays closed. This is a safety net in
-	# addition to each overlay's own _ready() setup, and prevents a visible
-	# pause/puzzle layer from covering the gameplay on first launch.
+	# Explicitly start with all modal overlays closed.
 	var hacking_overlay := get_node_or_null("HackingPuzzle")
 	if hacking_overlay:
 		hacking_overlay.hide()
@@ -43,18 +43,12 @@ func _ready() -> void:
 		push_warning("Main scene is missing Terminal or World; check main.tscn scene instances.")
 		return
 
-	# The instanced training room is renamed to "World" in main.tscn, so
-	# search for its security light directly rather than looking for a nested
-	# node named "TestRoom". Continue startup checks even if the optional link
-	# is missing.
 	var security_light := world.find_child("SecurityLight", true, false) as Node3D
-	if security_light != null and terminal.has_method("set"):
+	if security_light != null:
 		terminal.set("linked_security_device", security_light)
 	else:
 		push_warning("SecurityLight was not found; terminal can still be hacked, but it cannot disable the light.")
 
-	# Lightweight startup assertions: if any of these fail, the CI smoke test
-	# can catch the broken scene before an APK is handed to the phone tester.
 	var player := get_node_or_null("Player")
 	if player == null:
 		push_error("STARTUP CHECK FAILED: Player scene is missing.")
@@ -86,3 +80,63 @@ func _ready() -> void:
 		push_error("STARTUP CHECK FAILED: hacking puzzle overlay is missing.")
 	elif hacking_puzzle.visible:
 		push_error("STARTUP CHECK FAILED: hacking puzzle should be hidden on launch.")
+
+	_setup_detection_feedback()
+	_connect_guard_alerts()
+
+func _setup_detection_feedback() -> void:
+	var layer := CanvasLayer.new()
+	layer.name = "DetectionFeedback"
+	layer.layer = 30
+	add_child(layer)
+
+	_alarm_flash = ColorRect.new()
+	_alarm_flash.name = "RedAlertFlash"
+	_alarm_flash.color = Color(0.95, 0.015, 0.025, 0.0)
+	_alarm_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_alarm_flash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	layer.add_child(_alarm_flash)
+
+	_alarm_banner = Label.new()
+	_alarm_banner.name = "SpottedBanner"
+	_alarm_banner.text = "SPOTTED  •  SECURITY ALERT"
+	_alarm_banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_alarm_banner.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_alarm_banner.add_theme_font_size_override("font_size", 30)
+	_alarm_banner.add_theme_color_override("font_color", Color(1.0, 0.16, 0.12, 1.0))
+	_alarm_banner.add_theme_color_override("font_outline_color", Color(0.02, 0.02, 0.04, 1.0))
+	_alarm_banner.add_theme_constant_override("outline_size", 6)
+	_alarm_banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_alarm_banner.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	_alarm_banner.offset_top = 84.0
+	_alarm_banner.offset_bottom = 132.0
+	_alarm_banner.visible = false
+	layer.add_child(_alarm_banner)
+
+func _connect_guard_alerts() -> void:
+	var guards := get_tree().get_nodes_in_group("guards")
+	if guards.size() < 3:
+		push_warning("STEALTH SETUP: expected three guards, found %d." % guards.size())
+	for guard_node in guards:
+		var callback := Callable(self, "_on_guard_detected").bind(guard_node)
+		if not guard_node.is_connected("detected_player", callback):
+			guard_node.connect("detected_player", callback)
+	print("STEALTH SETUP OK: connected %d guard alert signal(s)." % guards.size())
+
+func _on_guard_detected(_player_position: Vector3, guard_node: Node) -> void:
+	if _alarm_active:
+		return
+	_alarm_active = true
+
+	var guard_id := int(guard_node.call("get_guard_id")) if guard_node.has_method("get_guard_id") else -1
+	var globals := get_node_or_null("/root/GameGlobals")
+	if globals:
+		globals.emit_signal("player_detected", guard_id, 100.0)
+
+	if _alarm_banner:
+		_alarm_banner.visible = true
+	if _alarm_flash:
+		var tween := create_tween()
+		tween.tween_property(_alarm_flash, "color:a", 0.42, 0.10)
+		tween.tween_property(_alarm_flash, "color:a", 0.0, 0.48)
+	print("STEALTH ALERT: player spotted by guard %d; security alarm triggered." % guard_id)
