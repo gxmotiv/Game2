@@ -134,6 +134,7 @@ func get_detection_range_for_player(target: Node3D) -> float:
 
 func blind_for(duration: float) -> void:
 	_blind_timer = maxf(_blind_timer, duration)
+	_player_visible = false
 
 func is_blinded() -> bool:
 	return _blind_timer > 0.0
