@@ -300,7 +300,7 @@ func _update_awareness_indicator() -> void:
 	var filled := clampi(int(ceil(_suspicion / 10.0)), 0, 10)
 	var meter := ""
 	for index in range(10):
-		meter += "■" if index < filled else "·"
+		meter += "#" if index < filled else "-"
 	awareness_label.visible = true
 	if _suspicion >= 100.0:
 		awareness_label.text = "!\n" + meter
