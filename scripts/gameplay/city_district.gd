@@ -269,7 +269,7 @@ func _build_extra_terminals() -> void:
 func _build_extra_guards() -> void:
 	# Two compact patrols complement the central guard in main.tscn (three total).
 	# Each route stays on a broad street so guards do not push into building colliders.
-	var guard_a := GUARD_SCENE.instantiate() as Guard
+	var guard_a := GUARD_SCENE.instantiate() as Node3D
 	guard_a.name = "DistrictGuardNorth"
 	guard_a.position = Vector3(0.0, 1.0, 22.0)
 	var north_route: Array[Vector3] = [
@@ -278,10 +278,10 @@ func _build_extra_guards() -> void:
 		Vector3(8.0, 1.0, 26.0),
 		Vector3(-8.0, 1.0, 26.0)
 	]
-	guard_a.set_patrol_points(north_route)
+	guard_a.call("set_patrol_points", north_route)
 	add_child(guard_a)
 
-	var guard_b := GUARD_SCENE.instantiate() as Guard
+	var guard_b := GUARD_SCENE.instantiate() as Node3D
 	guard_b.name = "DistrictGuardEast"
 	guard_b.position = Vector3(22.0, 1.0, 0.0)
 	var east_route: Array[Vector3] = [
@@ -290,7 +290,7 @@ func _build_extra_guards() -> void:
 		Vector3(26.0, 1.0, 8.0),
 		Vector3(26.0, 1.0, -8.0)
 	]
-	guard_b.set_patrol_points(east_route)
+	guard_b.call("set_patrol_points", east_route)
 	add_child(guard_b)
 
 func _add_solid_box(box_name: String, position: Vector3, size: Vector3, material: Material) -> void:
