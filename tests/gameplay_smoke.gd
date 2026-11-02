@@ -328,5 +328,33 @@ func _run_gameplay_smoke_test() -> void:
 		_fail("Hacking puzzle did not close after success.")
 		return
 	print("GAMEPLAY CHECK OK: circuit puzzle completes and terminal records the hack.")
+
+	# Complete the awareness meter to verify the 100% spotted/alarm transition.
+	var stealth_system: Node = root.get_node_or_null("StealthSystem")
+	if stealth_system == null or not is_equal_approx(float(stealth_system.get("detection_threshold")), 100.0):
+		_fail("Shared StealthSystem detection threshold is not 100 percent.")
+		return
+	guard.global_position = Vector3(0.0, 1.0, 4.0)
+	guard.rotation = Vector3.ZERO
+	guard.set("_target_position", player.global_position)
+	player.global_position = Vector3(0.0, 1.0, 0.0)
+	player.set("_is_crouching", false)
+	guard.call("_check_player_visibility", 5.0)
+	if not is_equal_approx(float(guard.call("get_suspicion")), 100.0):
+		_fail("A sustained clear sighting did not fill suspicion to 100 percent.")
+		return
+	if int(guard.call("get_state")) != 3:
+		_fail("A 100 percent suspicion level did not transition the guard to ALERT.")
+		return
+	var awareness_label: Label3D = guard.get_node("AwarenessLabel") as Label3D
+	if awareness_label == null or not awareness_label.visible or not awareness_label.text.begins_with("!"):
+		_fail("The guard awareness indicator did not switch to the red exclamation mark.")
+		return
+	var spotted_banner: Label = game.get_node_or_null("DetectionFeedback/SpottedBanner") as Label
+	var red_flash: ColorRect = game.get_node_or_null("DetectionFeedback/RedAlertFlash") as ColorRect
+	if spotted_banner == null or not spotted_banner.visible or red_flash == null:
+		_fail("The 100 percent detection event did not trigger the on-screen security alarm.")
+		return
+	print("STEALTH CHECK OK: 100 percent suspicion triggers ALERT, red exclamation marker, and screen alarm.")
 	print("GAMEPLAY SMOKE TEST PASSED.")
 	quit(0)
