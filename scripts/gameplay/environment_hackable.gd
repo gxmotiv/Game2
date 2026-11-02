@@ -140,17 +140,18 @@ func _hack_steam_pipe() -> void:
 		_steam.lifetime = 2.8
 		_steam.one_shot = true
 		_steam.explosiveness = 0.92
-		var process := ParticleProcessMaterial.new()
-		process.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
-		process.emission_sphere_radius = 0.38
-		process.direction = Vector3.UP
-		process.spread = 58.0
-		process.gravity = Vector3(0, 0.22, 0)
-		process.initial_velocity_min = 1.0
-		process.initial_velocity_max = 3.2
-		process.scale_min = 0.28
-		process.scale_max = 0.72
-		_steam.process_material = process
+		# CPUParticles3D uses direct particle properties (not GPUParticles3D process_material/draw_pass).
+		_steam.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
+		_steam.emission_sphere_radius = 0.38
+		_steam.direction = Vector3.UP
+		_steam.spread = 58.0
+		_steam.gravity = Vector3(0.0, 0.22, 0.0)
+		_steam.initial_velocity_min = 1.0
+		_steam.initial_velocity_max = 3.2
+		_steam.scale_amount_min = 0.28
+		_steam.scale_amount_max = 0.72
+		_steam.damping_min = 0.2
+		_steam.damping_max = 0.7
 		var puff := SphereMesh.new()
 		puff.radius = 0.15
 		puff.height = 0.3
@@ -161,7 +162,7 @@ func _hack_steam_pipe() -> void:
 		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 		material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		puff.material = material
-		_steam.draw_pass_1 = puff
+		_steam.mesh = puff
 		add_child(_steam)
 	_steam.restart()
 	_steam.emitting = true
