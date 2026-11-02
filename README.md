@@ -18,7 +18,7 @@ VEIL CIRCUIT is an original stealth-action game where you play as a cybernetical
 - **Playable city district:** Procedural 4×4-block district with roads, sidewalks, lane markings, low-poly buildings, facade windows, rooftop HVAC props, junction lamps, utility cabinets, decorative CCTV housings, and sidewalk bollards.
 - **Player character:** Original low-poly cyber-operative assembled from procedural meshes with dark tactical clothing, armor, backpack, utility belt, and cyan cyber-tech accents.
 - **Hacking:** Interactive circuit puzzle and hackable terminals connected to the security-light network.
-- **Stealth foundation:** Guard patrols and security devices; a larger mission and detection system remains in development.
+- **Guard stealth (Phase 3 foundation):** Three route-driven guards patrol the district; 90° vision checks use `RayCast3D` line-of-sight against physical cover, crouching halves detection range, suspicion rises to 100%, and a yellow-to-red overhead meter culminates in a red-screen security alarm.
 - **Mobile controls:** Touch joystick, camera-look area, sprint, crouch, interact, and pause/resume.
 - **Visual pass:** Procedural asphalt grain, concrete slab seams, facade panel variation, brushed-metal detail, filmic night grading, depth fog, restrained glow, rooftop trims, neon signage, antennas, and intersection crosswalks.
 - **Performance strategy:** Godot Compatibility renderer, batched MultiMesh city props and decorative details, no real-time shadows/reflections, low-cost shader math, and a 30 FPS target for low-end Android.
@@ -26,7 +26,7 @@ VEIL CIRCUIT is an original stealth-action game where you play as a cybernetical
 
 ## Planned next milestones
 
-- Improve guard awareness and stealth feedback, then add mission objectives and progression.
+- Validate guard patrol, cover, crouch detection, suspicion and alarm behavior on the target Android device; mission objectives and progression remain future work.
 - Add safe, tested character movement and hacking animations.
 - Add optional free licensed sound effects and ambient audio with documented asset licenses.
 - Add selected CC0 PBR texture assets at optimized 512–1024 px sizes only after visual and memory profiling; do not add large texture packs blindly.
