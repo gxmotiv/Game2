@@ -2,7 +2,7 @@ name: Build Android Debug APK
 
 on:
   push:
-    branches: [kilo/airy-chime-uvv, fix/veil-circuit-runtime, feat/city-district-hacking, feat/veil-circuit-character-visuals]
+    branches: [chore/ecc-copilot-game-workflow, kilo/airy-chime-uvv, fix/veil-circuit-runtime, feat/city-district-hacking, feat/veil-circuit-character-visuals]
   pull_request:
   workflow_dispatch:
 
@@ -148,18 +148,21 @@ jobs:
         run: |
           cat $HOME/.config/godot/editor_settings-4.tres
 
-      - name: Restore stable Android debug keystore
+      - name: Generate Debug Keystore
+        run: |
+          mkdir -p ~/.android
+          if [ ! -f ~/.android/debug.keystore ]; then
+            keytool -genkey -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          fi
+
+      - name: Cache Debug Keystore
         uses: actions/cache@v4
         with:
           path: ~/.android/debug.keystore
           key: veil-circuit-debug-keystore-v1-${{ runner.os }}
 
-      - name: Prepare Android debug signing
+      - name: Configure Android debug signing
         run: |
-          mkdir -p "$HOME/.android"
-          if [ ! -f "$HOME/.android/debug.keystore" ]; then
-            keytool -genkeypair -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
-          fi
           {
             echo "GODOT_ANDROID_KEYSTORE_DEBUG_PATH=$HOME/.android/debug.keystore"
             echo "GODOT_ANDROID_KEYSTORE_DEBUG_USER=androiddebugkey"
