@@ -73,15 +73,23 @@ func _ready() -> void:
 		_hacking_puzzle = preload("res://scenes/ui/hacking_puzzle.tscn").instantiate()
 		get_tree().root.add_child(_hacking_puzzle)
 
+	# MobileHUD is a later sibling in main.tscn; bind after every sibling has entered the tree.
+	call_deferred("_bind_hack_ui")
+
+func _bind_hack_ui() -> void:
 	var mobile_hud := get_tree().root.find_child("MobileHUD", true, false)
-	if mobile_hud:
-		_hack_button = mobile_hud.get_node_or_null("ButtonContainer/HackButton") as Button
-		_hack_progress_control = mobile_hud.get_node_or_null("HackProgressRing") as Control
+	if mobile_hud == null:
+		push_error("HACK UI binding failed: MobileHUD was not found.")
+		return
+	_hack_button = mobile_hud.get_node_or_null("ButtonContainer/HackButton") as Button
+	_hack_progress_control = mobile_hud.get_node_or_null("HackProgressRing") as Control
 	if _hack_button:
 		_hack_button.visible = false
 		var hack_pressed_callback := Callable(self, "_try_hack_from_hud")
 		if not _hack_button.pressed.is_connected(hack_pressed_callback):
 			_hack_button.pressed.connect(hack_pressed_callback)
+	else:
+		push_error("HACK UI binding failed: HackButton is missing.")
 	if _hack_progress_control and _hack_progress_control.has_method("set_active"):
 		_hack_progress_control.call("set_active", false)
 	else:
