@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - kilo/airy-chime-uvv
   workflow_dispatch:
 
 permissions:
