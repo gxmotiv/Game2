@@ -18,7 +18,7 @@ func _on_button_pressed() -> void:
 
 	match action_name:
 		"interact":
-			# Activate on a completed tap, and ask the player to refresh range first.
+			# Existing terminal action keeps opening the circuit puzzle.
 			var player: Node = get_tree().get_first_node_in_group("player")
 			if is_instance_valid(player) and player.has_method("_try_interact_from_hud"):
 				player.call("_try_interact_from_hud")

@@ -115,6 +115,100 @@ func _run_gameplay_smoke_test() -> void:
 	guard.set("_target_position", Vector3(-8.0, 1.0, -8.0))
 	print("STEALTH CHECK OK: physical cover blocks line of sight.")
 
+	# Phase 4: verify all environmental hackable categories and the separate HACK UI.
+	var environment_props := get_nodes_in_group("environment_hackables")
+	if environment_props.size() != 7:
+		_fail("Expected seven environmental props (3 signals, 2 pipes, 2 boxes), found " + str(environment_props.size()) + ".")
+		return
+	var traffic_count := 0
+	var pipe_count := 0
+	var box_count := 0
+	for prop in environment_props:
+		match int(prop.get("object_type")):
+			0: traffic_count += 1
+			1: pipe_count += 1
+			2: box_count += 1
+	if traffic_count != 3 or pipe_count != 2 or box_count != 2:
+		_fail("Environmental prop distribution is incorrect.")
+		return
+	var hack_button: Button = mobile_hud.get_node_or_null("ButtonContainer/HackButton") as Button
+	var progress_ring: Control = mobile_hud.get_node_or_null("HackProgressRing") as Control
+	if hack_button == null or progress_ring == null:
+		_fail("The HACK button or circular progress indicator is missing.")
+		return
+	print("WORLD HACK CHECK OK: 3 traffic lights, 2 steam pipes, 2 electrical boxes and HACK UI are present.")
+
+	# Aim at the north steam pipe, begin the real two-second hack, and verify the guard reacts.
+	var steam_pipe: Node = game.find_child("SteamPipeNorth", true, false)
+	var north_guard: Node = game.find_child("DistrictGuardNorth", true, false)
+	if steam_pipe == null or north_guard == null:
+		_fail("North steam pipe or nearby patrol guard is missing.")
+		return
+	player.global_position = Vector3(-7.0, 1.0, 13.0)
+	player.set("_camera_yaw", PI)
+	player.call("_refresh_environment_target")
+	if player.get("_current_environment_hackable") != steam_pipe or not hack_button.visible:
+		_fail("Looking directly at the nearby steam pipe did not select it or reveal the HACK button.")
+		return
+	hack_button.emit_signal("pressed")
+	if not bool(player.get("_hack_in_progress")):
+		_fail("The HACK button press did not start the two-second hack action.")
+		return
+	if not progress_ring.visible:
+		_fail("The hack action started, but the circular progress ring did not become visible.")
+		return
+	await create_timer(2.15).timeout
+	if bool(player.get("_hack_in_progress")) or bool(steam_pipe.call("can_hack")):
+		_fail("Steam pipe hack did not finish after the two-second progress action.")
+		return
+	if not bool(north_guard.call("is_blinded")) or int(north_guard.call("get_state")) != 2:
+		_fail("Steam burst did not blind the nearby guard and send it to investigate.")
+		return
+	if progress_ring.visible:
+		_fail("Circular progress indicator remained visible after the hack completed.")
+		return
+	print("WORLD HACK CHECK OK: two-second steam hack triggers burst, blindness and guard investigation.")
+
+	# Traffic signal hacking diverts the central guard to the junction.
+	var traffic_light: Node = game.find_child("TrafficLightCentralEast", true, false)
+	if traffic_light == null:
+		_fail("Central traffic signal was not generated.")
+		return
+	player.global_position = Vector3(5.0, 1.0, -5.5)
+	if not bool(traffic_light.call("execute_hack", player)) or int(guard.call("get_state")) != 2:
+		_fail("Traffic signal hack did not distract the nearby guard into investigation.")
+		return
+	print("WORLD HACK CHECK OK: traffic signal changes state and diverts the nearby guard.")
+
+	# Electrical boxes expose an active local dark-zone radius and disable local lights.
+	var electrical_box: Node = game.find_child("ElectricalBoxNorth", true, false)
+	if electrical_box == null:
+		_fail("Electrical box was not generated.")
+		return
+	player.global_position = Vector3(-8.6, 1.0, 15.4)
+	if not bool(electrical_box.call("execute_hack", player)):
+		_fail("Electrical box could not be hacked while the player was in range.")
+		return
+	if not bool(electrical_box.call("is_dark_zone_active")) or not bool(electrical_box.call("is_position_dark", player.global_position)):
+		_fail("Electrical box did not create its local dark-zone area.")
+		return
+	if float(north_guard.call("get_detection_range_for_player", player)) > 7.5:
+		_fail("Guard detection range was not reduced while the player was in the dark zone.")
+		return
+	var nearby_light_disabled := false
+	for light_node in get_nodes_in_group("district_lights"):
+		if light_node is Light3D and light_node.global_position.distance_to(electrical_box.global_position) <= 12.0:
+			nearby_light_disabled = is_zero_approx((light_node as Light3D).light_energy)
+			if nearby_light_disabled:
+				break
+	if not nearby_light_disabled:
+		_fail("Electrical box did not switch off a local security light.")
+		return
+	electrical_box.call("_toggle_dark_zone")
+	player.global_position = Vector3(0.0, 1.0, 0.0)
+	player.set("_camera_yaw", 0.0)
+	print("WORLD HACK CHECK OK: electrical box disables local lights and reduces detection in darkness.")
+
 	var joystick: Control = mobile_hud.get_node("JoystickContainer/VirtualJoystick") as Control
 	var joystick_script: Script = joystick.get_script() as Script
 	print("JOYSTICK_DIAGNOSTIC: script=", joystick_script.resource_path if joystick_script != null else "NULL",

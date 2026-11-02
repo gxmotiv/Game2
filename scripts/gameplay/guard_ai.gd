@@ -58,6 +58,8 @@ var _patrol_timer: float = 0.0
 var _target_position: Vector3 = Vector3.ZERO
 var _last_known_player_pos: Vector3 = Vector3.ZERO
 var _search_timer: float = 0.0
+var _investigation_timer: float = 0.0
+var _blind_timer: float = 0.0
 var _detection_timer: float = 0.0
 var _player_visible: bool = false
 var _player_node: Node3D
@@ -120,9 +122,32 @@ func get_guard_id() -> int:
 	return _guard_id
 
 func get_detection_range_for_player(target: Node3D) -> float:
+	var effective_range := cone_range
 	if is_instance_valid(target) and bool(target.get("_is_crouching")):
-		return cone_range * 0.5
-	return cone_range
+		effective_range *= 0.5
+	if is_instance_valid(target):
+		for zone in get_tree().get_nodes_in_group("dark_zones"):
+			if zone.has_method("is_position_dark") and bool(zone.call("is_position_dark", target.global_position)):
+				effective_range *= 0.5
+				break
+	return effective_range
+
+func blind_for(duration: float) -> void:
+	_blind_timer = maxf(_blind_timer, duration)
+	_player_visible = false
+
+func is_blinded() -> bool:
+	return _blind_timer > 0.0
+
+func investigate_sound(sound_position: Vector3, duration: float = 5.0) -> void:
+	investigate_distraction(sound_position, duration)
+
+func investigate_distraction(world_position: Vector3, duration: float = 5.0) -> void:
+	if _state == State.ALERT:
+		return
+	_target_position = Vector3(world_position.x, global_position.y, world_position.z)
+	_investigation_timer = maxf(0.5, duration)
+	_change_state(State.INVESTIGATING)
 
 func can_see_player_now() -> bool:
 	_find_player()
@@ -141,6 +166,7 @@ func _find_player() -> void:
 		vision_ray.add_exception(_player_node as CollisionObject3D)
 
 func _physics_process(delta: float) -> void:
+	_blind_timer = maxf(0.0, _blind_timer - delta)
 	_detection_timer += delta
 	if _detection_timer >= detection_update_interval:
 		var scan_delta: float = _detection_timer
@@ -152,6 +178,8 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 
 func _can_see_player() -> bool:
+	if _blind_timer > 0.0:
+		return false
 	if not is_instance_valid(_player_node) or not _player_node.is_inside_tree() or vision_ray == null:
 		return false
 
@@ -216,6 +244,16 @@ func _handle_state_machine(delta: float) -> void:
 			_target_position = _last_known_player_pos
 			if _suspicion <= 0.0:
 				_change_state(State.PATROL)
+		State.INVESTIGATING:
+			_investigation_timer -= delta
+			if _player_visible:
+				_change_state(State.ALERT)
+			elif _horizontal_distance(global_position, _target_position) <= 1.0:
+				_target_position = global_position
+				if _investigation_timer <= 0.0:
+					_change_state(State.RETURNING)
+			elif _investigation_timer <= 0.0:
+				_change_state(State.RETURNING)
 		State.ALERT:
 			if _player_visible:
 				_target_position = _last_known_player_pos

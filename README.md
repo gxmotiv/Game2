@@ -17,16 +17,16 @@ VEIL CIRCUIT is an original stealth-action game where you play as a cybernetical
 
 - **Playable city district:** Procedural 4×4-block district with roads, sidewalks, lane markings, low-poly buildings, facade windows, rooftop HVAC props, junction lamps, utility cabinets, decorative CCTV housings, and sidewalk bollards.
 - **Player character:** Original low-poly cyber-operative assembled from procedural meshes with dark tactical clothing, armor, backpack, utility belt, and cyan cyber-tech accents.
-- **Hacking:** Interactive circuit puzzle and hackable terminals connected to the security-light network.
-- **Guard stealth (Phase 3 foundation):** Three route-driven guards patrol the district; 90° vision checks use `RayCast3D` line-of-sight against physical cover, crouching halves detection range, suspicion rises to 100%, and a yellow-to-red overhead meter culminates in a red-screen security alarm.
-- **Mobile controls:** Touch joystick, camera-look area, sprint, crouch, interact, and pause/resume.
+- **Hacking:** Circuit-puzzle terminals plus Phase 4 environmental hacks: three traffic signals distract guards, two steam pipes burst with a blinding steam cloud, and two electrical cabinets cut nearby security lights and create local dark zones. Environmental hacks use a separate two-second HACK action and circular progress UI.
+- **Guard stealth (Phase 3 + 4):** Three route-driven guards patrol the district; 90° vision checks use `RayCast3D` against physical cover, crouching halves detection range, suspicion rises to 100%, and an overhead meter leads to a red-screen alert. Steam and traffic-control distractions send nearby guards off-route to investigate; steam temporarily blinds them.
+- **Mobile controls:** Touch joystick, camera-look area, sprint, crouch, interact, contextual HACK, and pause/resume.
 - **Visual pass:** Procedural asphalt grain, concrete slab seams, facade panel variation, brushed-metal detail, filmic night grading, depth fog, restrained glow, rooftop trims, neon signage, antennas, and intersection crosswalks.
 - **Performance strategy:** Godot Compatibility renderer, batched MultiMesh city props and decorative details, no real-time shadows/reflections, low-cost shader math, and a 30 FPS target for low-end Android.
 - **Zero-budget policy:** Built-in Godot geometry/materials and free/open-source resources only; no paid assets, API keys, ads, tracking, or required runtime downloads.
 
 ## Planned next milestones
 
-- Validate guard patrol, cover, crouch detection, suspicion and alarm behavior on the target Android device; mission objectives and progression remain future work.
+- Validate Phase 3 guard stealth and Phase 4 environmental hacks on the target Android device; mission objectives and progression remain future work.
 - Add safe, tested character movement and hacking animations.
 - Add optional free licensed sound effects and ambient audio with documented asset licenses.
 - Add selected CC0 PBR texture assets at optimized 512–1024 px sizes only after visual and memory profiling; do not add large texture packs blindly.
@@ -102,7 +102,7 @@ godot --headless --script-classes
 
 **Movement:** `move_left`, `move_right`, `move_forward`, `move_backward`
 **Modifiers:** `sprint`, `crouch`
-**Interaction:** `interact`, `pause`
+**Interaction:** `interact`, contextual `HACK` touch button, `pause`
 **Camera:** `camera_orbit`, `camera_zoom`
 **Hacking:** `hack_up`, `hack_down`, `hack_left`, `hack_right`, `hack_confirm`, `hack_cancel`
 

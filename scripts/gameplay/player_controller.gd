@@ -47,6 +47,13 @@ var _mesh_height: float = 1.8
 var _look_touch_id: int = -1
 var _camera_yaw: float = 0.0
 var _camera_pitch: float = 0.0
+var _current_environment_hackable: Node3D = null
+var _hack_progress_control: Control
+var _hack_button: Button
+var _hack_target: Node3D
+var _hack_timer: float = 0.0
+var _hack_duration: float = 2.0
+var _hack_in_progress: bool = false
 
 func _ready() -> void:
 	add_to_group("player")
@@ -66,6 +73,28 @@ func _ready() -> void:
 		_hacking_puzzle = preload("res://scenes/ui/hacking_puzzle.tscn").instantiate()
 		get_tree().root.add_child(_hacking_puzzle)
 
+	# MobileHUD is a later sibling in main.tscn; bind after every sibling has entered the tree.
+	call_deferred("_bind_hack_ui")
+
+func _bind_hack_ui() -> void:
+	var mobile_hud := get_tree().root.find_child("MobileHUD", true, false)
+	if mobile_hud == null:
+		push_error("HACK UI binding failed: MobileHUD was not found.")
+		return
+	_hack_button = mobile_hud.get_node_or_null("ButtonContainer/HackButton") as Button
+	_hack_progress_control = mobile_hud.get_node_or_null("HackProgressRing") as Control
+	if _hack_button:
+		_hack_button.visible = false
+		var hack_pressed_callback := Callable(self, "_try_hack_from_hud")
+		if not _hack_button.pressed.is_connected(hack_pressed_callback):
+			_hack_button.pressed.connect(hack_pressed_callback)
+	else:
+		push_error("HACK UI binding failed: HackButton is missing.")
+	if _hack_progress_control and _hack_progress_control.has_method("set_active"):
+		_hack_progress_control.call("set_active", false)
+	else:
+		push_error("HACK progress ring script is missing or unavailable.")
+
 func _setup_camera() -> void:
 	camera.projection = Camera3D.PROJECTION_PERSPECTIVE
 	camera.fov = 70.0
@@ -77,8 +106,32 @@ func _setup_camera() -> void:
 	camera_pivot.position = Vector3(0.0, camera_height, camera_distance)
 	camera.make_current()
 
+func _process(delta: float) -> void:
+	if not _hack_in_progress:
+		return
+	if not is_instance_valid(_hack_target) or global_position.distance_to(_hack_target.global_position) > 9.0:
+		_cancel_environment_hack()
+		return
+	_hack_timer = minf(_hack_duration, _hack_timer + delta)
+	if _hack_progress_control and _hack_progress_control.has_method("set_progress"):
+		_hack_progress_control.call("set_progress", _hack_timer / _hack_duration)
+	if _hack_timer >= _hack_duration:
+		var completed_target := _hack_target
+		_hack_in_progress = false
+		_hack_target = null
+		if is_instance_valid(completed_target) and completed_target.has_method("execute_hack"):
+			completed_target.call("execute_hack", self)
+		if _hack_progress_control and _hack_progress_control.has_method("set_active"):
+			_hack_progress_control.call("set_active", false)
+		if _hack_button:
+			_hack_button.visible = false
+		_refresh_environment_target()
+
 func _physics_process(delta: float) -> void:
 	if _in_puzzle:
+		return
+	if _hack_in_progress:
+		_update_camera(delta)
 		return
 
 	_handle_movement(delta)
@@ -203,12 +256,69 @@ func _check_interaction(delta: float) -> void:
 		else:
 			interaction_unavailable.emit()
 
+	_refresh_environment_target()
 	var objective_label: Node = get_tree().root.find_child("ObjectiveLabel", true, false)
 	if objective_label:
-		if is_instance_valid(_current_interactable):
+		if is_instance_valid(_current_environment_hackable):
+			var target_name: String = str(_current_environment_hackable.call("get_display_name"))
+			objective_label.text = "TAP TO HACK  •  " + target_name.to_upper()
+		elif is_instance_valid(_current_interactable):
 			objective_label.text = "TERMINAL IN RANGE  •  TAP INTERACT"
 		else:
 			objective_label.text = "OBJECTIVE: REACH THE TERMINAL  •  DRAG RIGHT SIDE TO LOOK"
+
+func _refresh_environment_target() -> void:
+	var previous_target := _current_environment_hackable
+	var forward := Vector3(0.0, -0.25, -1.0).rotated(Vector3.UP, _camera_yaw).normalized()
+	var ray_origin := global_position + Vector3(0.0, 1.2, 0.0)
+	var query := PhysicsRayQueryParameters3D.create(ray_origin, ray_origin + forward * 8.0)
+	query.exclude = [get_rid()]
+	query.collision_mask = 1
+	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	var next_target: Node3D = null
+	if not hit.is_empty():
+		var collider := hit.get("collider") as Node3D
+		if is_instance_valid(collider) and collider.has_method("execute_hack") and collider.has_method("get_player_in_range"):
+			if bool(collider.call("get_player_in_range")) and (not collider.has_method("can_hack") or bool(collider.call("can_hack"))):
+				next_target = collider
+
+	if is_instance_valid(previous_target) and previous_target != next_target and previous_target.has_method("set_prompt_visible"):
+		previous_target.call("set_prompt_visible", false)
+	_current_environment_hackable = next_target
+	if is_instance_valid(_current_environment_hackable):
+		if _current_environment_hackable.has_method("set_prompt_visible"):
+			_current_environment_hackable.call("set_prompt_visible", true)
+		if _hack_button:
+			_hack_button.visible = bool(_current_environment_hackable.call("can_hack")) if _current_environment_hackable.has_method("can_hack") else true
+	else:
+		if _hack_button:
+			_hack_button.visible = false
+
+func _try_hack_from_hud() -> void:
+	if _in_puzzle or _hack_in_progress:
+		return
+	_refresh_environment_target()
+	if not is_instance_valid(_current_environment_hackable):
+		return
+	if not bool(_current_environment_hackable.call("can_hack")):
+		return
+	_hack_target = _current_environment_hackable
+	_hack_timer = 0.0
+	_hack_in_progress = true
+	if _hack_progress_control and _hack_progress_control.has_method("set_active"):
+		_hack_progress_control.call("set_active", true)
+	if _hack_progress_control and _hack_progress_control.has_method("set_progress"):
+		_hack_progress_control.call("set_progress", 0.0)
+	if _hack_button:
+		_hack_button.visible = false
+
+func _cancel_environment_hack() -> void:
+	_hack_in_progress = false
+	_hack_target = null
+	_hack_timer = 0.0
+	if _hack_progress_control and _hack_progress_control.has_method("set_active"):
+		_hack_progress_control.call("set_active", false)
+	_refresh_environment_target()
 
 func _try_interact_from_hud() -> void:
 	# Called by a completed INTERACT tap. Refresh target selection immediately,
