@@ -54,10 +54,10 @@ func _run_gameplay_smoke_test() -> void:
 		if not guard_node is CharacterBody3D:
 			_fail("A guard is not a CharacterBody3D.")
 			return
-		if guard_node.get_node_or_null("VisionRay") is not RayCast3D:
+		if not guard_node.get_node_or_null("VisionRay") is RayCast3D:
 			_fail("A guard is missing its VisionRay RayCast3D.")
 			return
-		if guard_node.get_node_or_null("AwarenessLabel") is not Label3D:
+		if not guard_node.get_node_or_null("AwarenessLabel") is Label3D:
 			_fail("A guard is missing its overhead awareness indicator.")
 			return
 		var patrol_route: Array = guard_node.call("get_patrol_points")
