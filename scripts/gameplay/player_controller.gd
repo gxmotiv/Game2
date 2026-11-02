@@ -79,8 +79,13 @@ func _ready() -> void:
 		_hack_progress_control = mobile_hud.get_node_or_null("HackProgressRing") as Control
 	if _hack_button:
 		_hack_button.visible = false
+		var hack_pressed_callback := Callable(self, "_try_hack_from_hud")
+		if not _hack_button.pressed.is_connected(hack_pressed_callback):
+			_hack_button.pressed.connect(hack_pressed_callback)
 	if _hack_progress_control and _hack_progress_control.has_method("set_active"):
 		_hack_progress_control.call("set_active", false)
+	else:
+		push_error("HACK progress ring script is missing or unavailable.")
 
 func _setup_camera() -> void:
 	camera.projection = Camera3D.PROJECTION_PERSPECTIVE
