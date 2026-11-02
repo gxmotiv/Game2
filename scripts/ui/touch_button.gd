@@ -22,11 +22,6 @@ func _on_button_pressed() -> void:
 			var player: Node = get_tree().get_first_node_in_group("player")
 			if is_instance_valid(player) and player.has_method("_try_interact_from_hud"):
 				player.call("_try_interact_from_hud")
-		"hack":
-			# Environmental props use a separate timed hack, not the terminal puzzle.
-			var player: Node = get_tree().get_first_node_in_group("player")
-			if is_instance_valid(player) and player.has_method("_try_hack_from_hud"):
-				player.call("_try_hack_from_hud")
 		"pause":
 			var pause_menu: Node = get_tree().root.find_child("PauseMenu", true, false)
 			if is_instance_valid(pause_menu):
