@@ -159,7 +159,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.android/debug.keystore
-          key: ${{ runner.os }}-godot-debug-keystore
+          key: veil-circuit-debug-keystore-v1-${{ runner.os }} # Preserve the signing key used by already-installed APKs
 
       - name: Configure Android debug signing
         run: |
