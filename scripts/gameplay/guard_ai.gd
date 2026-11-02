@@ -233,6 +233,9 @@ func _handle_state_machine(delta: float) -> void:
 			elif not _patrol_world_points.is_empty() and _horizontal_distance(global_position, _target_position) < 0.8:
 				_change_state(State.PATROL)
 
+func _horizontal_distance(a: Vector3, b: Vector3) -> float:
+	return Vector2(a.x, a.z).distance_to(Vector2(b.x, b.z))
+
 func _update_patrol_target(delta: float) -> void:
 	if _patrol_world_points.is_empty():
 		return
