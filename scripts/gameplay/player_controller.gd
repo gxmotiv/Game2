@@ -266,7 +266,7 @@ func _refresh_environment_target() -> void:
 	if not hit.is_empty():
 		var collider := hit.get("collider") as Node3D
 		if is_instance_valid(collider) and collider.has_method("execute_hack") and collider.has_method("get_player_in_range"):
-			if bool(collider.call("get_player_in_range")):
+			if bool(collider.call("get_player_in_range")) and (not collider.has_method("can_hack") or bool(collider.call("can_hack"))):
 				next_target = collider
 
 	if is_instance_valid(previous_target) and previous_target != next_target and previous_target.has_method("set_prompt_visible"):
