@@ -42,7 +42,13 @@ The official Watch Dogs description highlights manipulating traffic lights, trai
 ### Phase C2 — Mission loop (not started)
 - Mission objectives with optional routes: disable security, reach a data point, extract, and escape.
 - Checkpoints, objective markers, mission results, and local save/progression.
-- Sound distractions and simple takedown/avoidance rules, only after core stealth is stable.
+
+### Phase 4 — Environmental hacking (current implementation)
+- Adds three traffic-light props at district junctions. Hacking forces the signal red and distracts nearby guards; vehicles are deliberately not implemented in this phase.
+- Adds two steam-pipe props. A separate two-second HACK action triggers a low-cost steam particle burst, temporarily blinds nearby guards, and sends them to investigate the burst location.
+- Adds two electrical cabinets. Hacking toggles nearby security Light3D nodes off/on and marks a local dark zone that reduces guard detection range for a player inside it.
+- Adds a proximity "TAP TO HACK" prompt, a dedicated mobile HACK button, and a circular two-second progress indicator. Terminal INTERACT and its circuit puzzle remain separate.
+- Automated checks cover prop counts, aim selection, progress timing, steam blindness/investigation, and dark-zone toggling. Real-device visibility and performance still require manual testing.
 
 ### Phase D — Compact open-world systems
 - Expand the district by streamed/loaded chunks rather than one enormous scene.
