@@ -108,6 +108,11 @@ func _run_gameplay_smoke_test() -> void:
 		return
 	cover_body.queue_free()
 	await physics_frame
+	# Restore the guard to its normal route before the existing movement tests.
+	guard.global_position = Vector3(-5.0, 1.0, -5.0)
+	guard.rotation = Vector3.ZERO
+	guard.velocity = Vector3.ZERO
+	guard.set("_target_position", Vector3(-8.0, 1.0, -8.0))
 	print("STEALTH CHECK OK: physical cover blocks line of sight.")
 
 	var joystick: Control = mobile_hud.get_node("JoystickContainer/VirtualJoystick") as Control
