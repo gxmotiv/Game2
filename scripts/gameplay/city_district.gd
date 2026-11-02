@@ -4,6 +4,7 @@ extends Node3D
 
 const TERMINAL_SCENE: PackedScene = preload("res://scenes/gameplay/terminal/terminal.tscn")
 const GUARD_SCENE: PackedScene = preload("res://scenes/gameplay/guard/guard.tscn")
+const ENVIRONMENT_HACKABLE_SCRIPT: Script = preload("res://scripts/gameplay/environment_hackable.gd")
 const STREET_SPACING: float = 24.0
 const CITY_EXTENT: float = 144.0
 const STREET_HALF_COUNT: int = 2
@@ -18,7 +19,8 @@ func _ready() -> void:
 	_build_security_network()
 	_build_extra_terminals()
 	_build_extra_guards()
-	print("CITY DISTRICT READY: 4x4 blocks, roads, 4 hackable terminals, low-poly batched geometry.")
+	_build_environment_hackables()
+	print("CITY DISTRICT READY: roads, terminals, three guards, and environmental hackables.")
 
 func _build_city_geometry() -> void:
 	var ground_material := _material(Color(0.11, 0.14, 0.16))
@@ -231,6 +233,7 @@ func _create_security_light(device_name: String, position: Vector3) -> Node3D:
 	device.position = position
 	var lamp := OmniLight3D.new()
 	lamp.name = "SecurityLightOmni"
+	lamp.add_to_group("district_lights")
 	lamp.light_color = Color(1.0, 0.28, 0.12)
 	lamp.light_energy = 0.45
 	lamp.omni_range = 5.5
@@ -292,6 +295,34 @@ func _build_extra_guards() -> void:
 	]
 	guard_b.call("set_patrol_points", east_route)
 	add_child(guard_b)
+
+
+func _build_environment_hackables() -> void:
+	# Signals at junctions; with no vehicles in this phase, nearby guards are distracted.
+	_spawn_environment_hackable("TrafficLightCentralEast", 0, Vector3(5.0, 0.0, -5.5), "Traffic Light")
+	_spawn_environment_hackable("TrafficLightEastJunction", 0, Vector3(28.5, 0.0, -19.5), "Traffic Light")
+	_spawn_environment_hackable("TrafficLightNorthJunction", 0, Vector3(-19.5, 0.0, 28.5), "Traffic Light")
+
+	# Steam bursts are deliberately placed near patrol lanes for a stealth distraction.
+	_spawn_environment_hackable("SteamPipeNorth", 1, Vector3(-7.0, 0.0, 20.0), "Steam Pipe")
+	_spawn_environment_hackable("SteamPipeEast", 1, Vector3(29.0, 0.0, 5.0), "Steam Pipe")
+
+	# Electrical cabinets sit on building edges near the local security-light network.
+	_spawn_environment_hackable("ElectricalBoxCentral", 2, Vector3(15.4, 0.0, -8.6), "Electrical Box")
+	_spawn_environment_hackable("ElectricalBoxNorth", 2, Vector3(-8.6, 0.0, 15.4), "Electrical Box")
+	print("CITY HACKABLES READY: 3 traffic signals, 2 steam pipes, 2 electrical cabinets.")
+
+func _spawn_environment_hackable(node_name: String, kind: int, position: Vector3, label: String) -> void:
+	var prop := ENVIRONMENT_HACKABLE_SCRIPT.new() as Node3D
+	if prop == null:
+		push_error("Could not instantiate environmental hackable: " + node_name)
+		return
+	prop.name = node_name
+	prop.position = position
+	prop.set("object_type", kind)
+	prop.set("display_name", label)
+	prop.set("effect_radius", 12.0 if kind == 2 else 10.0)
+	add_child(prop)
 
 func _add_solid_box(box_name: String, position: Vector3, size: Vector3, material: Material) -> void:
 	var body := StaticBody3D.new()
