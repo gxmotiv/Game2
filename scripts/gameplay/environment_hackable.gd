@@ -40,6 +40,12 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	_cooldown = maxf(0.0, _cooldown - delta)
+	if _prompt:
+		_prompt.visible = get_player_in_range() and can_hack()
+		var camera := get_viewport().get_camera_3d()
+		if _prompt.visible and camera:
+			_prompt.look_at(camera.global_position, Vector3.UP)
+			_prompt.rotate_y(PI)
 
 func _build_collision() -> void:
 	var node := CollisionShape3D.new()
