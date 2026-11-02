@@ -7,6 +7,7 @@ func _enter_tree() -> void:
 	_attach_control_script("JoystickContainer/VirtualJoystick", "res://scripts/ui/virtual_joystick.gd")
 	_attach_control_script("ButtonContainer/InteractButton", "res://scripts/ui/touch_button.gd", "interact")
 	_attach_control_script("ButtonContainer/HackButton", "res://scripts/ui/touch_button.gd", "hack")
+	_attach_control_script("HackProgressRing", "res://scripts/ui/hack_progress_ring.gd")
 	_attach_control_script("ButtonContainer/SprintButton", "res://scripts/ui/touch_button.gd", "sprint")
 	_attach_control_script("ButtonContainer/CrouchButton", "res://scripts/ui/touch_button.gd", "crouch")
 	_attach_control_script("PauseButton", "res://scripts/ui/touch_button.gd", "pause")
