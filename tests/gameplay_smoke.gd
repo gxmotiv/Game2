@@ -151,8 +151,11 @@ func _run_gameplay_smoke_test() -> void:
 		_fail("Looking directly at the nearby steam pipe did not select it or reveal the HACK button.")
 		return
 	hack_button.emit_signal("pressed")
-	if not bool(player.get("_hack_in_progress")) or not progress_ring.visible:
-		_fail("The HACK action did not start the circular progress indicator.")
+	if not bool(player.get("_hack_in_progress")):
+		_fail("The HACK button press did not start the two-second hack action.")
+		return
+	if not progress_ring.visible:
+		_fail("The hack action started, but the circular progress ring did not become visible.")
 		return
 	await create_timer(2.15).timeout
 	if bool(player.get("_hack_in_progress")) or bool(steam_pipe.call("can_hack")):
